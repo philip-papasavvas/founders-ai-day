@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meal Planning Amp</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#fff7f7;--cream-strong:#fff1f4;--blush:#ffdbe6;--petal:#f7bfd0;
+  --berry:#bf4f77;--plum:#4f2740;--rosewood:#7f3557;--sage:#dcebd8;
+  --gold:#eabf6a;--ink:#34232d;--muted:#735865;
+  --line:rgba(127,53,87,0.14);--shadow:0 18px 38px rgba(105,56,79,0.12);
+}
+body{
+  background:
+    radial-gradient(circle at top right,rgba(191,79,119,0.15),transparent 26%),
+    radial-gradient(circle at 15% 0%,rgba(255,209,220,0.6),transparent 20%),
+    radial-gradient(circle at bottom left,rgba(220,235,216,0.7),transparent 24%),
+    linear-gradient(180deg,#fff8fb 0%,#fff3f6 100%);
+  color:var(--ink);font-family:'IBM Plex Sans',sans-serif;
+  line-height:1.5;padding:0;
+}
+.container{max-width:1440px;margin:0 auto;padding:1.5rem 2rem 3rem}
+h1,h2,h3{font-family:'Cormorant Garamond',serif;color:var(--plum);letter-spacing:-0.02em}
+
+/* Hero */
+.hero{
+  position:relative;overflow:hidden;
+  background:linear-gradient(135deg,rgba(255,247,247,0.96),rgba(255,236,242,0.92));
+  border:1px solid var(--line);border-radius:28px;
+  padding:1.35rem 1.45rem 1.15rem;box-shadow:var(--shadow);margin-bottom:0.85rem;
+}
+.hero::before,.hero::after{content:'';position:absolute;border-radius:999px;pointer-events:none}
+.hero::before{width:240px;height:240px;right:-80px;top:-100px;background:radial-gradient(circle,rgba(191,79,119,0.18),rgba(191,79,119,0))}
+.hero::after{width:200px;height:200px;left:-70px;bottom:-120px;background:radial-gradient(circle,rgba(220,235,216,0.9),rgba(220,235,216,0))}
+.hero-kicker{text-transform:uppercase;letter-spacing:0.18em;font-size:0.72rem;font-weight:700;color:var(--berry);margin-bottom:0.35rem}
+.hero-title{font-family:'Cormorant Garamond',serif;font-size:3rem;line-height:0.92;margin:0;color:var(--plum);max-width:18ch}
+.hero-copy{max-width:65rem;margin-top:0.65rem;margin-bottom:0.4rem;line-height:1.45;color:var(--muted);font-size:0.97rem}
+.hero-ribbon{display:inline-flex;align-items:center;gap:0.45rem;padding:0.35rem 0.7rem;border-radius:999px;background:rgba(191,79,119,0.10);color:var(--rosewood);font-size:0.82rem;font-weight:600;margin-top:0.35rem}
+.caption{color:var(--muted);font-size:0.85rem;margin-bottom:1rem}
+
+/* Stat cards */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0.75rem;margin-bottom:1.2rem}
+.stat-card{background:rgba(255,251,252,0.94);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:0.9rem 1rem;min-height:116px}
+.stat-label{text-transform:uppercase;letter-spacing:0.13em;color:var(--berry);font-size:0.72rem;font-weight:700;margin-bottom:0.45rem}
+.stat-value{font-family:'Cormorant Garamond',serif;font-size:2rem;color:var(--plum);margin-bottom:0.2rem}
+.stat-copy{color:var(--muted);line-height:1.35;font-size:0.9rem}
+
+/* Tabs */
+.tabs{display:flex;gap:0.35rem;margin-bottom:1rem;flex-wrap:wrap}
+.tab-btn{
+  background:rgba(255,244,248,0.72);border:1px solid rgba(191,79,119,0.12);
+  border-radius:999px;padding:0.58rem 0.95rem;cursor:pointer;
+  font-family:'IBM Plex Sans',sans-serif;font-size:0.9rem;font-weight:500;
+  color:var(--ink);transition:all 0.2s;
+}
+.tab-btn:hover{background:rgba(191,79,119,0.08)}
+.tab-btn.active{background:rgba(191,79,119,0.10);border-color:rgba(191,79,119,0.22);font-weight:600}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* Day cards */
+.week-grid-top{display:grid;grid-template-columns:repeat(4,1fr);gap:0.75rem;margin-bottom:0.75rem}
+.week-grid-bottom{display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem}
+.day-card{background:rgba(255,251,252,0.94);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:0.82rem 0.88rem 0.88rem;min-height:320px}
+.day-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.7rem}
+.day-title{font-family:'Cormorant Garamond',serif;font-size:1.45rem;color:var(--plum)}
+.day-stamp{font-size:0.72rem;color:var(--berry);text-transform:uppercase;letter-spacing:0.12em;font-weight:700}
+
+.slot-card{display:grid;grid-template-columns:50px 1fr;gap:0.65rem;padding:0.65rem;border-radius:18px;background:rgba(255,241,244,0.72);border:1px solid rgba(191,79,119,0.12);margin-bottom:0.55rem}
+.slot-art{width:50px;height:50px;border-radius:16px;display:grid;place-items:center;font-size:1.35rem;background:linear-gradient(135deg,rgba(255,255,255,0.88),rgba(255,215,227,0.82));box-shadow:inset 0 1px 1px rgba(255,255,255,0.85)}
+.slot-kind{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--berry);margin-bottom:0.18rem}
+.slot-title{font-size:0.93rem;font-weight:600;color:var(--ink);line-height:1.22;margin-bottom:0.18rem}
+.slot-meta{font-size:0.8rem;color:var(--muted);line-height:1.28}
+.slot-note{font-size:0.8rem;color:var(--muted);line-height:1.28;margin-top:0.18rem}
+
+/* Recipe cards */
+.recipe-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:0.8rem}
+.recipe-card{background:rgba(255,251,252,0.94);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:0.95rem 1rem;margin-bottom:0.8rem}
+.recipe-top{display:grid;grid-template-columns:70px 1fr;gap:0.85rem;margin-bottom:0.6rem;align-items:center}
+.recipe-art{width:70px;height:70px;border-radius:22px;display:grid;place-items:center;font-size:1.9rem;background:linear-gradient(135deg,rgba(255,255,255,0.98),rgba(255,223,232,0.88))}
+.recipe-title{font-family:'Cormorant Garamond',serif;font-size:1.6rem;color:var(--plum);margin:0;line-height:1}
+.recipe-subtitle{color:var(--muted);font-size:0.87rem;margin-top:0.22rem}
+.recipe-copy{color:var(--ink);line-height:1.42;font-size:0.92rem;margin-bottom:0.45rem}
+.method-list{margin:0.45rem 0 0;padding-left:1rem;color:var(--ink);line-height:1.42;font-size:0.9rem}
+.method-list li{margin-bottom:0.25rem}
+.recipe-note{margin-top:0.55rem;color:var(--rosewood);font-size:0.82rem;font-weight:600}
+.badge-row{display:flex;flex-wrap:wrap;gap:0.35rem;margin-top:0.45rem}
+.tiny-badge{display:inline-block;padding:0.22rem 0.55rem;border-radius:999px;background:rgba(191,79,119,0.10);color:var(--rosewood);font-size:0.75rem;font-weight:700}
+
+/* Recipe sub-tabs */
+.sub-tabs{display:flex;gap:0.3rem;margin-bottom:0.8rem}
+.sub-tab-btn{
+  background:rgba(255,244,248,0.5);border:1px solid rgba(191,79,119,0.08);
+  border-radius:999px;padding:0.45rem 0.8rem;cursor:pointer;
+  font-family:'IBM Plex Sans',sans-serif;font-size:0.82rem;font-weight:500;
+  color:var(--muted);transition:all 0.2s;
+}
+.sub-tab-btn:hover{background:rgba(191,79,119,0.06)}
+.sub-tab-btn.active{background:rgba(191,79,119,0.10);border-color:rgba(191,79,119,0.18);color:var(--rosewood);font-weight:600}
+.sub-panel{display:none}
+.sub-panel.active{display:block}
+
+/* Shopping table */
+.shopping-header{display:flex;align-items:center;gap:1.5rem;margin-bottom:0.8rem;flex-wrap:wrap}
+.shopping-header .caption{margin-bottom:0}
+.shopping-table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:var(--shadow);background:rgba(255,251,252,0.94)}
+.shopping-table thead{background:rgba(255,241,244,0.72)}
+.shopping-table th{text-align:left;padding:0.7rem 1rem;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--berry);border-bottom:1px solid var(--line)}
+.shopping-table td{padding:0.55rem 1rem;font-size:0.9rem;border-bottom:1px solid rgba(127,53,87,0.06)}
+.shopping-table tr:last-child td{border-bottom:none}
+.shopping-table tbody tr:hover{background:rgba(255,241,244,0.4)}
+.category-cell{font-weight:600;color:var(--rosewood)}
+
+/* Footer */
+.footer{text-align:center;margin-top:2.5rem;padding-top:1.5rem;border-top:1px solid var(--line);color:var(--muted);font-size:0.82rem}
+
+@media(max-width:900px){
+  .hero-title{font-size:2.2rem}
+  .day-card{min-height:auto}
+  .week-grid-top{grid-template-columns:repeat(2,1fr)}
+  .week-grid-bottom{grid-template-columns:repeat(2,1fr)}
+  .recipe-grid{grid-template-columns:1fr}
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:600px){
+  .container{padding:1rem}
+  .week-grid-top,.week-grid-bottom{grid-template-columns:1fr}
+  .stats-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-kicker">Mitchell family kitchen club</div>
+    <h1 class="hero-title">A pink little planning studio for the week ahead.</h1>
+    <p class="hero-copy">
+      This version is built for a household about to meet a new little girl: clearer week structure, compact shopping, quicker rating decisions, and recipes that feel like a family system instead of a one-off spreadsheet.
+    </p>
+    <div class="hero-ribbon">Baby-ready meals &middot; commuter breakfasts &middot; guest-proof weekends</div>
+  </section>
+
+  <p class="caption">What the old version got wrong: the pills carried too much meaning, the week itself was hard to read, and the shopping list wasted space. This version fixes those first.</p>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Estimated spend</div>
+      <div class="stat-value">GBP 94</div>
+      <div class="stat-copy">Comfortably inside budget</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Kitchen load</div>
+      <div class="stat-value">10.9h</div>
+      <div class="stat-copy">Total prep and cook time across the batched week.</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">At-home lunches</div>
+      <div class="stat-value">10</div>
+      <div class="stat-copy">Mat leave lunches plus the days you are home.</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Hosted dinners</div>
+      <div class="stat-value">0</div>
+      <div class="stat-copy">Weekend dinners scaled for guests rather than guesswork.</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Loved meals</div>
+      <div class="stat-value">1</div>
+      <div class="stat-copy">Meals in this week already rated 4 or 5 in the library.</div>
+    </div>
+  </div>
+
+  <!-- Main tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="weekly">Weekly pattern</button>
+    <button class="tab-btn" data-tab="recipes">Recipes &amp; methods</button>
+    <button class="tab-btn" data-tab="shopping">Shopping list</button>
+  </div>
+
+  <!-- Weekly pattern -->
+  <div class="tab-panel active" id="tab-weekly">
+    <p class="caption">This is the view that matters most on the go: every day is explicit, so you can see the actual household plan instead of a pile of batches.</p>
+
+    <div class="week-grid-top">
+      <!-- Monday -->
+      <div class="day-card">
+        <div class="day-head"><div class="day-title">Monday</div><div class="day-stamp">weekly pattern</div></div>
+        <div class="slot-card">
+          <div class="slot-art" style="border:1px solid #c85b7e33">&#127822;</div>
+          <div><div class="slot-kind">Breakfast</div><div class="slot-title">Cottage cheese pots with granola and fruit</div><div class="slot-meta">1 portion &middot; 29g protein</div><div class="slot-note">Portable batch for the first part of the working week.</div></div>
+        </div>
+        <div class="slot-card">
+          <div class="slot-art" style="border:1px solid #6d9ec233">&#128031;</div>
+          <div><div class="slot-kind">Lunch</div><div class="slot-title">Tuna, white bean, and lemon crunch bowls</div><div class="slot-meta">1 portion &middot; 32g protein</div><div class="slot-note">Covers Monday to Wednesday lunches.</div></div>
+        </div>
+        <div class="slot-card">
+          <div class="slot-art" style="border:1px solid #d9bb5933">&#127819;</div>
+          <div><div class="slot-kind">Dinner</div><div class="slot-title">Lemon chicken traybake with potatoes and greens</div><div class="slot-meta">2 portions &middot; 38g protein</div><div class="slot-note">Standard household dinner slot.</div></div>
+        </div>
+      </div>
+
+      <!-- Tuesday -->
+      <div class="day-card">
+        <div class="day-head"><div class="day-title">Tuesday</div><div class="day-stamp">weekly pattern</div></div>
+        <div class="slot-card">
+          <div class="slot-art" style="border:1px solid #c85b7e33">&#127822;</div>
+          <div><div class="slot-kind">Breakfast</div><div class="slot-title">Cottage cheese pots with granola and fruit</div><div class="slot-meta">1 portion &middot; 29g protein</div><div class="slot-note">Portable batch for the first part of the working week.</div></div>
+        </div>
+        <div class="slot-card">
+          <div class="slot-art" style="border:1px solid #6d9ec233">&#128031;</div>
+          <div><div class="slot-kind">Lunch</div><div class="slot-title">Tuna, white bean, and lemon crunch bowls</div><div class="slot-meta">1 portion &middot; 32g protein</div><div class="slot-note">Covers Monday to Wednesday lunches.</div></div>
+        </div>
+        <div class="slot-card">
+          <div class="slot-art" style="border:1px solid #c67a4d33">&#129370;</div>
+          <div><div class="slot-kind">Dinner</div><div class="slot-title">Spinach dal with jammy eggs and naan</div><div class="slot-meta">2 portions &middot; 24g protein</div><div class="slot-note">Standard household dinner slot.</div></div>
+        </div>
+      </div>
+
+      <!-- Wednesday -->
+      <div class="day-card">
+        <div class="day-head"><div class="day-title">Wednesday</div><div class="day-stamp">weekly pattern</div></div>
+        <div class="slot-card">
+          <div class="slot-art" style="border:1px solid #c85b7e33">&#127822;</div>
+          <div><div class="slot-kind">Breakfast</div><div class="slot-title">Cottage cheese pots with granola and fruit</div><div class="slot-meta">1 portion &middot; 29g protein</div><div class="slot-note">Portable batch for the first part of the working week.</div></div>
+        </div>
+        <div class="slot-card">
+          <div class="slot-art" style="border:1px solid #6d9ec233">&#128031;</div>
+          <div><div class="slot-kind">Lunch</div><div class="slot-title">Tuna, white bean, and lemon crunch bowls</div><div class="slot-meta">1 portion &middot; 32g protein</div><div class="slot-note">Covers Monday to Wednesday lunches.</div></div>
+        </div>
+        <div class="slot-card">
+          <div class="slot-art" style="border:1px solid #bb5c7233">&#127837;</div>
+          <div><div class="slot-kind">Dinner</div><div class="slot-title">Turkey meatball orzo bake</div><div class="slot-meta">2 portions &middot; 37g protein</div><div class="slot-note">Standard household dinner slot.</div></div>
+        </div>
+      </div>
+
+      <!-- Thursday -->
+      <div class="day-card">
+        <div class="day-head"><div class="day-title">Thursday</div><div class="day-stamp">weekly pattern</div></div>
+        <div class="slot-card">
+          <div class="slot-art" style="border:1px solid #cf5f8733">&#129379;</div>
+          <div><div class="slot-kind">Breakfast</div><div class="slot-title">Skyr overnight oats with chia and berries</div><div class="slot-meta">1 portion &middot; 31g protein</div><div class="slot-note">Second batch to stop breakfast fatigue by Thursday.</div></div>
+        </div>
+        <div class="slot-card">
+          <div class="slot-art" style="border:1px solid #d58b6333">&#127858;</div>
+          <div><div class="slot-kind">Lunch</div><div class="slot-title">Red lentil soup with yogurt and flatbread</div><div class="slot-meta">1 portion &middot; 23g protein</div><div class="slot-note">Covers Thursday to Friday lunches.</div></div>
+        </div>
+        <div class="slot-card">
+          <div class="slot-art" style="border:1px solid #c7885833">&#127831;</div>
+          <div><div class="slot-kind">Dinner</div><div class="slot-title">Roast chicken with carrots, potatoes, and gravy</div><div class="slot-meta">2 portions &middot; 39g protein</div><div class="slot-note">Standard household dinner slot.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="week-grid-bottom">
+      <!-- Friday -->
+      <div class="day-card">
+        <div class="day-head"><div class="day-title">Friday</div><div class="day-stamp">weekly pattern</div></div>
+        <div class="slot-card">
+          <div class="slot-art" style="border:1px solid #cf5f8733">&#129379;</div>
+          <div><div class="slot-kind">Breakfast</div><div class="slot-title">Skyr overnight oats with chia and berries</div><div class="slot-meta">1 portion &middot; 31g protein</div><div class="slot-note">Second batch to stop breakfast fatigue by Thursday.</div></div>
+        </div>
+        <div class="slot-card">
+          <div class="slot-art" style="border:1px solid #d58b6333">&#127858;</div>
+          <div><div class="slot-kind">Lunch</div><div class="slot-title">Red lentil soup with yogurt and flatbread</div><div class="slot-meta">2 portions &middot; 23g protein</div><div class="slot-note">Covers Thursday to Friday lunches.</div></div>
+        </div>
+        <div class="slot-card">
+          <div class="slot-art" style="border:1px solid #8a415933">&#127837;</div>
+          <div><div class="slot-kind">Dinner</div><div class="slot-title">Slow-cooked beef ragu with pappardelle</div><div class="slot-meta">2 portions &middot; 37g protein</div><div class="slot-note">Standard household dinner slot.</div></div>
+        </div>
+      </div>
+
+      <!-- Saturday -->
+      <div class="day-card">
+        <div class="day-head"><div class="day-title">Saturday</div><div class="day-stamp">weekly pattern</div></div>
+        <div class="slot-card">
+          <div class="slot-art" style="border:1px solid #d36d8b33">&#129473;</div>
+          <div><div class="slot-kind">Breakfast</div><div class="slot-title">Egg, spinach, and feta breakfast muffins</div><div class="slot-meta">2 portions &middot; 27g protein</div><div class="slot-note">One relaxed breakfast recipe for Saturday and Sunday.</div></div>
+        </div>
+        <div class="slot-card">
+          <div class="slot-art" style="border:1px solid #9fbc8c33">&#129367;</div>
+          <div><div class="slot-kind">Lunch</div><div class="slot-title">Chicken pesto pasta salad jars</div><div class="slot-meta">2 portions &middot; 34g protein</div><div class="slot-note">Covers Saturday to Sunday lunches.</div></div>
+        </div>
+        <div class="slot-card">
+          <div class="slot-art" style="border:1px solid #8d4a4d33">&#129385;</div>
+          <div><div class="slot-kind">Dinner</div><div class="slot-title">Beef and broccoli sesame noodles</div><div class="slot-meta">2 portions &middot; 35g protein</div><div class="slot-note">Standard household dinner slot.</div></div>
+        </div>
+      </div>
+
+      <!-- Sunday -->
+      <div class="day-card">
+        <div class="day-head"><div class="day-title">Sunday</div><div class="day-stamp">weekly pattern</div></div>
+        <div class="slot-card">
+          <div class="slot-art" style="border:1px solid #d36d8b33">&#129473;</div>
+          <div><div class="slot-kind">Breakfast</div><div class="slot-title">Egg, spinach, and feta breakfast muffins</div><div class="slot-meta">2 portions &middot; 27g protein</div><div class="slot-note">One relaxed breakfast recipe for Saturday and Sunday.</div></div>
+        </div>
+        <div class="slot-card">
+          <div class="slot-art" style="border:1px solid #9fbc8c33">&#129367;</div>
+          <div><div class="slot-kind">Lunch</div><div class="slot-title">Chicken pesto pasta salad jars</div><div class="slot-meta">2 portions &middot; 34g protein</div><div class="slot-note">Covers Saturday to Sunday lunches.</div></div>
+        </div>
+        <div class="slot-card">
+          <div class="slot-art" style="border:1px solid #f08a8233">&#127843;</div>
+          <div><div class="slot-kind">Dinner</div><div class="slot-title">Teriyaki salmon rice bowls with edamame</div><div class="slot-meta">2 portions &middot; 36g protein</div><div class="slot-note">Standard household dinner slot.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recipes & methods -->
+  <div class="tab-panel" id="tab-recipes">
+    <p class="caption">Each generated meal now carries a short method so you can remember how it is meant to come together without opening another notes app.</p>
+
+    <div class="sub-tabs">
+      <button class="sub-tab-btn active" data-subtab="breakfast">Breakfast</button>
+      <button class="sub-tab-btn" data-subtab="lunch">Lunch</button>
+      <button class="sub-tab-btn" data-subtab="dinner">Dinner</button>
+    </div>
+
+    <!-- Breakfast recipes -->
+    <div class="sub-panel active" id="subtab-breakfast">
+      <div class="recipe-grid">
+        <div class="recipe-card">
+          <div class="recipe-top">
+            <div class="recipe-art" style="border:1px solid #c85b7e33">&#127822;</div>
+            <div><div class="recipe-title">Cottage cheese pots with granola and fruit</div><div class="recipe-subtitle">Weekday breakfast prep A &middot; 3 portions &middot; prep 10m &middot; cook 0m</div></div>
+          </div>
+          <div class="recipe-copy">Low-effort protein pots for commuter mornings.</div>
+          <ol class="method-list">
+            <li>Spoon cottage cheese into jars and season lightly with cinnamon.</li>
+            <li>Add chopped apple and pumpkin seeds for crunch.</li>
+            <li>Keep granola separate until eating so the texture stays sharp.</li>
+          </ol>
+          <div class="recipe-note">Finish: A tiny drizzle of honey makes this feel less functional and more breakfast-y.</div>
+          <div class="badge-row"><span class="tiny-badge">portable</span><span class="tiny-badge">high protein</span><span class="tiny-badge">calcium</span></div>
+        </div>
+
+        <div class="recipe-card">
+          <div class="recipe-top">
+            <div class="recipe-art" style="border:1px solid #cf5f8733">&#129379;</div>
+            <div><div class="recipe-title">Skyr overnight oats with chia and berries</div><div class="recipe-subtitle">Weekday breakfast prep B &middot; 2 portions &middot; prep 12m &middot; cook 0m</div></div>
+          </div>
+          <div class="recipe-copy">Cold, portable, and easy to eat on the train or at the desk.</div>
+          <ol class="method-list">
+            <li>Whisk the skyr, milk, chia, and honey until smooth.</li>
+            <li>Fold through the oats and berries, then portion into jars.</li>
+            <li>Leave overnight and grab straight from the fridge in the morning.</li>
+          </ol>
+          <div class="recipe-note">Finish: Top with a few extra berries so it still feels deliberate at 7am.</div>
+          <div class="badge-row"><span class="tiny-badge">portable</span><span class="tiny-badge">high protein</span><span class="tiny-badge">fiber</span></div>
+        </div>
+
+        <div class="recipe-card">
+          <div class="recipe-top">
+            <div class="recipe-art" style="border:1px solid #d36d8b33">&#129473;</div>
+            <div><div class="recipe-title">Egg, spinach, and feta breakfast muffins</div><div class="recipe-subtitle">Weekend breakfast &middot; 4 portions &middot; prep 15m &middot; cook 22m</div></div>
+          </div>
+          <div class="recipe-copy">A fast batch bake with good protein and iron support.</div>
+          <ol class="method-list">
+            <li>Saute the spinach and peppers briefly so the muffins stay firm.</li>
+            <li>Whisk eggs with feta, fill the tray, and bake until just set.</li>
+            <li>Cool fully before boxing them up with oatcakes for grab-and-go mornings.</li>
+          </ol>
+          <div class="recipe-note">Finish: Pack two muffins with a small pot of hot sauce or ketchup.</div>
+          <div class="badge-row"><span class="tiny-badge">portable</span><span class="tiny-badge">high protein</span><span class="tiny-badge">iron</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lunch recipes -->
+    <div class="sub-panel" id="subtab-lunch">
+      <div class="recipe-grid">
+        <div class="recipe-card">
+          <div class="recipe-top">
+            <div class="recipe-art" style="border:1px solid #6d9ec233">&#128031;</div>
+            <div><div class="recipe-title">Tuna, white bean, and lemon crunch bowls</div><div class="recipe-subtitle">Batch lunch 1 &middot; 3 portions &middot; prep 12m &middot; cook 0m</div></div>
+          </div>
+          <div class="recipe-copy">No-cook lunch with omega-3s and plenty of texture.</div>
+          <ol class="method-list">
+            <li>Drain the beans and tuna well so the bowls stay bright rather than soggy.</li>
+            <li>Toss everything with lemon and olive oil at the last moment.</li>
+            <li>Pack rocket separately if you want maximum crunch.</li>
+          </ol>
+          <div class="recipe-note">Finish: Keep a lemon wedge in the lunch box for a final squeeze before eating.</div>
+          <div class="badge-row"><span class="tiny-badge">batch</span><span class="tiny-badge">high protein</span><span class="tiny-badge">omega3</span></div>
+        </div>
+
+        <div class="recipe-card">
+          <div class="recipe-top">
+            <div class="recipe-art" style="border:1px solid #d58b6333">&#127858;</div>
+            <div><div class="recipe-title">Red lentil soup with yogurt and flatbread</div><div class="recipe-subtitle">Batch lunch 2 &middot; 3 portions &middot; prep 14m &middot; cook 28m</div></div>
+          </div>
+          <div class="recipe-copy">Budget-friendly, warm, and useful for postpartum recovery weeks.</div>
+          <ol class="method-list">
+            <li>Soften onion, garlic, and carrot until sweet and glossy.</li>
+            <li>Add lentils and stock, then simmer until the soup turns silky.</li>
+            <li>Serve with yogurt and warm flatbread for a fuller lunch.</li>
+          </ol>
+          <div class="recipe-note">Finish: A spoon of yogurt and a dusting of paprika make it look finished, not improvised.</div>
+          <div class="badge-row"><span class="tiny-badge">batch</span><span class="tiny-badge">budget</span><span class="tiny-badge">iron</span><span class="tiny-badge">fiber</span></div>
+        </div>
+
+        <div class="recipe-card">
+          <div class="recipe-top">
+            <div class="recipe-art" style="border:1px solid #9fbc8c33">&#129367;</div>
+            <div><div class="recipe-title">Chicken pesto pasta salad jars</div><div class="recipe-subtitle">Batch lunch 3 &middot; 4 portions &middot; prep 18m &middot; cook 20m</div></div>
+          </div>
+          <div class="recipe-copy">Cold lunch that survives a busy weekday without fuss.</div>
+          <ol class="method-list">
+            <li>Roast or pan-cook the chicken while the pasta boils.</li>
+            <li>Toss pasta, pesto, tomatoes, spinach, and mozzarella while still slightly warm.</li>
+            <li>Layer into jars so each lunch is ready without morning assembly.</li>
+          </ol>
+          <div class="recipe-note">Finish: Finish with black pepper and a few halved tomatoes right on top.</div>
+          <div class="badge-row"><span class="tiny-badge">batch</span><span class="tiny-badge">portable</span><span class="tiny-badge">high protein</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dinner recipes -->
+    <div class="sub-panel" id="subtab-dinner">
+      <div class="recipe-grid">
+        <div class="recipe-card">
+          <div class="recipe-top">
+            <div class="recipe-art" style="border:1px solid #d9bb5933">&#127819;</div>
+            <div><div class="recipe-title">Lemon chicken traybake with potatoes and greens</div><div class="recipe-subtitle">Monday dinner &middot; 2 portions &middot; prep 16m &middot; cook 42m</div></div>
+          </div>
+          <div class="recipe-copy">One-pan dinner that covers protein, carbs, and greens cleanly.</div>
+          <ol class="method-list">
+            <li>Toss potatoes with seasoning first so they get the longest blast in the oven.</li>
+            <li>Add the chicken and lemon, then roast until the skin turns glossy and deep gold.</li>
+            <li>Finish the greens separately and spoon over yogurt just before serving.</li>
+          </ol>
+          <div class="recipe-note">Finish: Pile everything onto one platter and let the lemon halves sit visibly on top.</div>
+          <div class="badge-row"><span class="tiny-badge">traybake</span><span class="tiny-badge">family</span><span class="tiny-badge">iron</span></div>
+        </div>
+
+        <div class="recipe-card">
+          <div class="recipe-top">
+            <div class="recipe-art" style="border:1px solid #c67a4d33">&#129370;</div>
+            <div><div class="recipe-title">Spinach dal with jammy eggs and naan</div><div class="recipe-subtitle">Tuesday dinner &middot; 2 portions &middot; prep 12m &middot; cook 30m</div></div>
+          </div>
+          <div class="recipe-copy">Budget dinner that still lands well nutritionally.</div>
+          <ol class="method-list">
+            <li>Cook the onions and garlic until sweet before adding the lentils.</li>
+            <li>Simmer the dal until thick, then fold through spinach at the end.</li>
+            <li>Boil the eggs until jammy and serve with warm naan.</li>
+          </ol>
+          <div class="recipe-note">Finish: Split the eggs on top so the yolk becomes part of the sauce.</div>
+          <div class="badge-row"><span class="tiny-badge">budget</span><span class="tiny-badge">vegetarian</span><span class="tiny-badge">iron</span></div>
+        </div>
+
+        <div class="recipe-card">
+          <div class="recipe-top">
+            <div class="recipe-art" style="border:1px solid #bb5c7233">&#127837;</div>
+            <div><div class="recipe-title">Turkey meatball orzo bake</div><div class="recipe-subtitle">Wednesday dinner &middot; 2 portions &middot; prep 22m &middot; cook 28m</div></div>
+          </div>
+          <div class="recipe-copy">Comfort-food dinner with lighter protein and easy leftovers.</div>
+          <ol class="method-list">
+            <li>Roll the turkey mince into small meatballs so they cook quickly and evenly.</li>
+            <li>Simmer the orzo in passata until it turns glossy and saucy.</li>
+            <li>Nestle in the meatballs, top with mozzarella, and bake until bubbling.</li>
+          </ol>
+          <div class="recipe-note">Finish: Serve in shallow bowls with extra greens folded through at the end.</div>
+          <div class="badge-row"><span class="tiny-badge">bake</span><span class="tiny-badge">family</span><span class="tiny-badge">reheat</span></div>
+        </div>
+
+        <div class="recipe-card">
+          <div class="recipe-top">
+            <div class="recipe-art" style="border:1px solid #c7885833">&#127831;</div>
+            <div><div class="recipe-title">Roast chicken with carrots, potatoes, and gravy</div><div class="recipe-subtitle">Thursday dinner &middot; 2 portions &middot; prep 24m &middot; cook 85m</div></div>
+          </div>
+          <div class="recipe-copy">Classic hosting dinner that also leaves useful leftovers.</div>
+          <ol class="method-list">
+            <li>Season the chicken well and get the potatoes into very hot fat.</li>
+            <li>Roast the chicken until the skin is dark gold and the vegetables are caramelized.</li>
+            <li>Make the gravy while the chicken rests so the table timing stays calm.</li>
+          </ol>
+          <div class="recipe-note">Finish: Bring it out whole first - the reveal is half the charm with this one.</div>
+          <div class="badge-row"><span class="tiny-badge">hosting</span><span class="tiny-badge">roast</span><span class="tiny-badge">weekend</span></div>
+        </div>
+
+        <div class="recipe-card">
+          <div class="recipe-top">
+            <div class="recipe-art" style="border:1px solid #8a415933">&#127837;</div>
+            <div><div class="recipe-title">Slow-cooked beef ragu with pappardelle</div><div class="recipe-subtitle">Friday dinner &middot; 2 portions &middot; prep 22m &middot; cook 160m</div></div>
+          </div>
+          <div class="recipe-copy">Hands-off weekend dinner with enough substance for guests.</div>
+          <ol class="method-list">
+            <li>Brown the beef deeply before adding the vegetables and passata.</li>
+            <li>Let the sauce go low and slow until the meat collapses.</li>
+            <li>Cook the pasta last minute and loosen the ragu with pasta water before serving.</li>
+          </ol>
+          <div class="recipe-note">Finish: Twist the pasta into nests and finish with a proper shower of parmesan.</div>
+          <div class="badge-row"><span class="tiny-badge">hosting</span><span class="tiny-badge">slow cook</span><span class="tiny-badge">iron</span></div>
+        </div>
+
+        <div class="recipe-card">
+          <div class="recipe-top">
+            <div class="recipe-art" style="border:1px solid #8d4a4d33">&#129385;</div>
+            <div><div class="recipe-title">Beef and broccoli sesame noodles</div><div class="recipe-subtitle">Saturday dinner &middot; 2 portions &middot; prep 16m &middot; cook 16m</div></div>
+          </div>
+          <div class="recipe-copy">Fast iron-rich dinner for heavier training weeks.</div>
+          <ol class="method-list">
+            <li>Cook the noodles first and rinse quickly so they do not clump.</li>
+            <li>Sear the beef fast over high heat, then add the broccoli and sesame oil.</li>
+            <li>Return the noodles and toss until everything is glossy and hot.</li>
+          </ol>
+          <div class="recipe-note">Finish: Finish with spring onions for a proper takeaway-at-home feel.</div>
+          <div class="badge-row"><span class="tiny-badge">quick</span><span class="tiny-badge">iron</span><span class="tiny-badge">stir fry</span></div>
+        </div>
+
+        <div class="recipe-card">
+          <div class="recipe-top">
+            <div class="recipe-art" style="border:1px solid #f08a8233">&#127843;</div>
+            <div><div class="recipe-title">Teriyaki salmon rice bowls with edamame</div><div class="recipe-subtitle">Sunday dinner &middot; 2 portions &middot; prep 14m &middot; cook 18m</div></div>
+          </div>
+          <div class="recipe-copy">High-protein dinner with omega-3s and minimal assembly.</div>
+          <ol class="method-list">
+            <li>Start the rice first, then roast or air-fry the salmon with teriyaki glaze.</li>
+            <li>Steam the edamame while you slice the cucumber.</li>
+            <li>Assemble in bowls so the hot salmon lands against the cold crunchy veg.</li>
+          </ol>
+          <div class="recipe-note">Finish: A sesame sprinkle on top makes these feel much more restaurant than spreadsheet.</div>
+          <div class="badge-row"><span class="tiny-badge">quick</span><span class="tiny-badge">omega3</span><span class="tiny-badge">recovery</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shopping list -->
+  <div class="tab-panel" id="tab-shopping">
+    <div class="shopping-header">
+      <p class="caption">55 line items across 6 grocery zones. Compact by design: one table, fast export, and enough context to send to your phone.</p>
+    </div>
+
+    <table class="shopping-table">
+      <thead><tr><th>Category</th><th>Item</th><th>Quantity</th></tr></thead>
+      <tbody>
+        <tr><td class="category-cell">Bakery</td><td>Flatbreads</td><td>3 item</td></tr>
+        <tr><td class="category-cell">Bakery</td><td>Naan breads</td><td>2 item</td></tr>
+        <tr><td class="category-cell">Cupboard</td><td>Chia seeds</td><td>30 g</td></tr>
+        <tr><td class="category-cell">Cupboard</td><td>Cinnamon</td><td>6 g</td></tr>
+        <tr><td class="category-cell">Cupboard</td><td>Egg noodles</td><td>160 g</td></tr>
+        <tr><td class="category-cell">Cupboard</td><td>Granola</td><td>150 g</td></tr>
+        <tr><td class="category-cell">Cupboard</td><td>Gravy granules</td><td>1 item</td></tr>
+        <tr><td class="category-cell">Cupboard</td><td>Honey</td><td>20 g</td></tr>
+        <tr><td class="category-cell">Cupboard</td><td>Jasmine rice</td><td>160 g</td></tr>
+        <tr><td class="category-cell">Cupboard</td><td>Oatcakes</td><td>8 item</td></tr>
+        <tr><td class="category-cell">Cupboard</td><td>Orzo</td><td>160 g</td></tr>
+        <tr><td class="category-cell">Cupboard</td><td>Pappardelle</td><td>167 g</td></tr>
+        <tr><td class="category-cell">Cupboard</td><td>Passata</td><td>583 g</td></tr>
+        <tr><td class="category-cell">Cupboard</td><td>Pasta</td><td>320 g</td></tr>
+        <tr><td class="category-cell">Cupboard</td><td>Pumpkin seeds</td><td>60 g</td></tr>
+        <tr><td class="category-cell">Cupboard</td><td>Red lentils</td><td>420 g</td></tr>
+        <tr><td class="category-cell">Cupboard</td><td>Rolled oats</td><td>160 g</td></tr>
+        <tr><td class="category-cell">Cupboard</td><td>Sesame oil</td><td>20 ml</td></tr>
+        <tr><td class="category-cell">Cupboard</td><td>Teriyaki sauce</td><td>90 ml</td></tr>
+        <tr><td class="category-cell">Cupboard</td><td>Tuna tins</td><td>3 item</td></tr>
+        <tr><td class="category-cell">Cupboard</td><td>Vegetable stock</td><td>1 item</td></tr>
+        <tr><td class="category-cell">Cupboard</td><td>White beans</td><td>2 tin</td></tr>
+        <tr><td class="category-cell">Fridge</td><td>Cottage cheese</td><td>600 g</td></tr>
+        <tr><td class="category-cell">Fridge</td><td>Eggs</td><td>10 item</td></tr>
+        <tr><td class="category-cell">Fridge</td><td>Feta</td><td>120 g</td></tr>
+        <tr><td class="category-cell">Fridge</td><td>Greek yogurt</td><td>255 g</td></tr>
+        <tr><td class="category-cell">Fridge</td><td>Milk</td><td>350 ml</td></tr>
+        <tr><td class="category-cell">Fridge</td><td>Mozzarella</td><td>280 g</td></tr>
+        <tr><td class="category-cell">Fridge</td><td>Parmesan</td><td>40 g</td></tr>
+        <tr><td class="category-cell">Fridge</td><td>Pesto</td><td>180 g</td></tr>
+        <tr><td class="category-cell">Fridge</td><td>Skyr or Greek yogurt</td><td>350 g</td></tr>
+        <tr><td class="category-cell">Frozen</td><td>Edamame</td><td>150 g</td></tr>
+        <tr><td class="category-cell">Frozen</td><td>Frozen berries</td><td>160 g</td></tr>
+        <tr><td class="category-cell">Produce</td><td>Apples</td><td>3 item</td></tr>
+        <tr><td class="category-cell">Produce</td><td>Baby potatoes</td><td>450 g</td></tr>
+        <tr><td class="category-cell">Produce</td><td>Broccoli</td><td>2 item</td></tr>
+        <tr><td class="category-cell">Produce</td><td>Carrots</td><td>7 item</td></tr>
+        <tr><td class="category-cell">Produce</td><td>Celery</td><td>1 item</td></tr>
+        <tr><td class="category-cell">Produce</td><td>Cherry tomatoes</td><td>438 g</td></tr>
+        <tr><td class="category-cell">Produce</td><td>Cucumber</td><td>1 item</td></tr>
+        <tr><td class="category-cell">Produce</td><td>Garlic cloves</td><td>5 item</td></tr>
+        <tr><td class="category-cell">Produce</td><td>Green beans</td><td>100 g</td></tr>
+        <tr><td class="category-cell">Produce</td><td>Lemons</td><td>3 item</td></tr>
+        <tr><td class="category-cell">Produce</td><td>Onions</td><td>4 item</td></tr>
+        <tr><td class="category-cell">Produce</td><td>Potatoes</td><td>500 g</td></tr>
+        <tr><td class="category-cell">Produce</td><td>Red peppers</td><td>1 item</td></tr>
+        <tr><td class="category-cell">Produce</td><td>Rocket</td><td>90 g</td></tr>
+        <tr><td class="category-cell">Produce</td><td>Spinach</td><td>433 g</td></tr>
+        <tr><td class="category-cell">Produce</td><td>Spring onions</td><td>1 bunch</td></tr>
+        <tr><td class="category-cell">Protein</td><td>Beef shin or chuck</td><td>400 g</td></tr>
+        <tr><td class="category-cell">Protein</td><td>Beef strips</td><td>325 g</td></tr>
+        <tr><td class="category-cell">Protein</td><td>Chicken thighs</td><td>1150 g</td></tr>
+        <tr><td class="category-cell">Protein</td><td>Salmon fillets</td><td>350 g</td></tr>
+        <tr><td class="category-cell">Protein</td><td>Turkey mince</td><td>350 g</td></tr>
+        <tr><td class="category-cell">Protein</td><td>Whole chicken</td><td>0.6 kg</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="footer">
+    Meal Planning Amp &middot; Built for the Mitchell family kitchen
+  </div>
+
+</div>
+
+<script>
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+document.querySelectorAll('.sub-tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.sub-tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.sub-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('subtab-' + btn.dataset.subtab).classList.add('active');
+  });
+});
+</script>
+</body>
+</html>
