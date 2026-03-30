@@ -10,7 +10,10 @@ Navigate there to see the apps we built and static ideas from the day.
 
 ## Projects
 
+Each project folder contains the source code for a functioning app. Each also has a static HTML version in the `site/` directory, which is deployed to the landing page above.
+
 | Directory | Description |
 |-----------|-------------|
 | `meal_planning_amp/` | Streamlit meal planning app for household weekly meals |
 | `site/` | Static HTML demos deployed to Netlify |
+| `site/meal-planning/` | Static HTML version of the meal planner |
