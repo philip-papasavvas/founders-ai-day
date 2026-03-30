@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Founders AI Day - Demos</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --plum:#4f2740;--berry:#bf4f77;--rosewood:#7f3557;
+  --ink:#34232d;--muted:#735865;
+  --line:rgba(127,53,87,0.14);--shadow:0 18px 38px rgba(105,56,79,0.12);
+}
+body{
+  background:
+    radial-gradient(circle at top right,rgba(191,79,119,0.12),transparent 30%),
+    radial-gradient(circle at bottom left,rgba(220,235,216,0.6),transparent 28%),
+    linear-gradient(180deg,#fff8fb 0%,#fff3f6 100%);
+  color:var(--ink);font-family:'IBM Plex Sans',sans-serif;
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  padding:2rem;
+}
+.page{max-width:720px;width:100%}
+.kicker{text-transform:uppercase;letter-spacing:0.18em;font-size:0.72rem;font-weight:700;color:var(--berry);margin-bottom:0.5rem}
+h1{font-family:'Cormorant Garamond',serif;font-size:3.2rem;line-height:1;color:var(--plum);margin-bottom:0.6rem}
+.subtitle{color:var(--muted);font-size:1.05rem;line-height:1.5;margin-bottom:2rem;max-width:50ch}
+.demos{display:grid;gap:0.8rem}
+a.demo-card{
+  display:grid;grid-template-columns:70px 1fr;gap:1rem;align-items:center;
+  background:rgba(255,251,252,0.94);border:1px solid var(--line);border-radius:22px;
+  box-shadow:var(--shadow);padding:1.1rem 1.2rem;
+  text-decoration:none;color:var(--ink);transition:all 0.2s;
+}
+a.demo-card:hover{transform:translateY(-2px);box-shadow:0 22px 44px rgba(105,56,79,0.16);border-color:rgba(191,79,119,0.25)}
+.demo-icon{width:70px;height:70px;border-radius:20px;display:grid;place-items:center;font-size:2rem;background:linear-gradient(135deg,rgba(255,255,255,0.98),rgba(255,223,232,0.88));border:1px solid rgba(191,79,119,0.12)}
+.demo-title{font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:var(--plum);line-height:1.1}
+.demo-desc{color:var(--muted);font-size:0.88rem;margin-top:0.2rem;line-height:1.35}
+.demo-arrow{color:var(--berry);font-size:0.82rem;font-weight:700;margin-top:0.35rem;text-transform:uppercase;letter-spacing:0.1em}
+.footer{text-align:center;margin-top:2.5rem;color:var(--muted);font-size:0.8rem}
+@media(max-width:600px){
+  h1{font-size:2.2rem}
+  a.demo-card{grid-template-columns:50px 1fr;gap:0.7rem;padding:0.9rem 1rem}
+  .demo-icon{width:50px;height:50px;font-size:1.5rem;border-radius:16px}
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="kicker">Founders AI Day</div>
+  <h1>Demo projects</h1>
+  <p class="subtitle">A collection of apps and prototypes built during Founders AI Day.</p>
+
+  <div class="demos">
+    <a class="demo-card" href="/meal-planning/">
+      <div class="demo-icon">&#127837;</div>
+      <div>
+        <div class="demo-title">Meal Planning Amp</div>
+        <div class="demo-desc">Weekly meal planner with batch cooking, shopping lists, and recipes for a busy household.</div>
+        <div class="demo-arrow">View demo &rarr;</div>
+      </div>
+    </a>
+  </div>
+
+  <div class="footer">Founders AI Day Demos</div>
+</div>
+</body>
+</html>
