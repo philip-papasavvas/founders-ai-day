@@ -1,0 +1,100 @@
+{
+  "meals": {
+    "beef_broccoli_noodles": {
+      "last_planned": "2026-03-29",
+      "meal_type": "dinner",
+      "name": "Beef and broccoli sesame noodles",
+      "rating": null,
+      "seen_count": 3
+    },
+    "chicken_pasta_salad": {
+      "last_planned": "2026-03-29",
+      "meal_type": "lunch",
+      "name": "Chicken pesto pasta salad jars",
+      "rating": 5,
+      "seen_count": 3
+    },
+    "cottage_pots": {
+      "last_planned": "2026-03-29",
+      "meal_type": "breakfast",
+      "name": "Cottage cheese pots with granola and fruit",
+      "rating": null,
+      "seen_count": 3
+    },
+    "egg_muffins": {
+      "last_planned": "2026-03-29",
+      "meal_type": "breakfast",
+      "name": "Egg, spinach, and feta breakfast muffins",
+      "rating": null,
+      "seen_count": 3
+    },
+    "hosting_beef_ragu": {
+      "last_planned": "2026-03-29",
+      "meal_type": "dinner",
+      "name": "Slow-cooked beef ragu with pappardelle",
+      "rating": null,
+      "seen_count": 3
+    },
+    "hosting_roast_chicken": {
+      "last_planned": "2026-03-29",
+      "meal_type": "dinner",
+      "name": "Roast chicken with carrots, potatoes, and gravy",
+      "rating": null,
+      "seen_count": 3
+    },
+    "lemon_chicken_traybake": {
+      "last_planned": "2026-03-29",
+      "meal_type": "dinner",
+      "name": "Lemon chicken traybake with potatoes and greens",
+      "rating": null,
+      "seen_count": 3
+    },
+    "lentil_dal_eggs": {
+      "last_planned": "2026-03-29",
+      "meal_type": "dinner",
+      "name": "Spinach dal with jammy eggs and naan",
+      "rating": null,
+      "seen_count": 3
+    },
+    "lentil_soup": {
+      "last_planned": "2026-03-29",
+      "meal_type": "lunch",
+      "name": "Red lentil soup with yogurt and flatbread",
+      "rating": null,
+      "seen_count": 3
+    },
+    "salmon_rice_bowls": {
+      "last_planned": "2026-03-29",
+      "meal_type": "dinner",
+      "name": "Teriyaki salmon rice bowls with edamame",
+      "rating": null,
+      "seen_count": 3
+    },
+    "skyr_overnight_oats": {
+      "last_planned": "2026-03-29",
+      "meal_type": "breakfast",
+      "name": "Skyr overnight oats with chia and berries",
+      "rating": null,
+      "seen_count": 3
+    },
+    "tuna_bean_bowls": {
+      "last_planned": "2026-03-29",
+      "meal_type": "lunch",
+      "name": "Tuna, white bean, and lemon crunch bowls",
+      "rating": null,
+      "seen_count": 3
+    },
+    "turkey_meatball_orzo": {
+      "last_planned": "2026-03-29",
+      "meal_type": "dinner",
+      "name": "Turkey meatball orzo bake",
+      "rating": null,
+      "seen_count": 3
+    }
+  },
+  "plan_signatures": [
+    "cf3a3f5ea3051def66e6c44ada610fcfb6bd6e54",
+    "415e91bf6bcf83eda9d5d7fddd7e6823c2d24817",
+    "16ffea4bba25157715c0c8ac3e846502b05bfa26"
+  ]
+}
