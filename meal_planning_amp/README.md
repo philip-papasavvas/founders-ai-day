@@ -1,6 +1,8 @@
 # Meal Planning Amp
 
-Standalone copy of the Mitchell family meal planner for the `founders-ai-day` folder.
+A household weekly meal planner built on Sunday 29 March 2026 at Dr Will's head office during the AI Founders Day.
+
+This app was generated using [Ampcode](https://ampcode.com), Sourcegraph's agentic coding tool.
 
 ## Contents
 
