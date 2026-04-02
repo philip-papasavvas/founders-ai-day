@@ -14,6 +14,8 @@ Each project folder contains the source code for a functioning app. Each also ha
 
 | Directory | Description |
 |-----------|-------------|
-| `meal_planning_amp/` | Streamlit meal planning app for household weekly meals |
+| `meal_planning_amp/` | Streamlit meal planner — built with [Ampcode](https://ampcode.com) (Sourcegraph) |
+| `meal_planner_mitchell/` | Streamlit meal planner — built with [Claude Code](https://docs.anthropic.com/en/docs/claude-code/overview) (Anthropic) |
 | `site/` | Static HTML demos deployed to Netlify |
-| `site/meal-planning/` | Static HTML version of the meal planner |
+| `site/meal-planning/` | Static HTML version of the Ampcode meal planner |
+| `site/meal-planner-claude/` | Static HTML version of the Claude Code meal planner |

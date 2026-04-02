@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meal Planning Amp — Claude Code Edition</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --pink:#FF4081;--pink-light:#3D1A2E;--pink-med:#F48FB1;--pink-dark:#FF80AB;
+  --bg:#0E1117;--card:#1A1D24;--card-hover:#252830;--border:#2D2F36;
+  --text:#EAEAEA;--muted:#9CA3AF;--deep-pink:#880E4F;
+}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;line-height:1.5}
+.container{max-width:1200px;margin:0 auto;padding:1rem 1.5rem 3rem}
+
+/* Banner */
+.banner{background:linear-gradient(135deg,#1A0E14 0%,var(--card) 50%,#1A0E14 100%);border:2px solid var(--pink);border-radius:12px;padding:16px 20px;margin-bottom:12px;text-align:center}
+.banner h1{color:var(--pink-dark);margin:0 0 4px;font-size:1.8rem}
+.banner p{color:var(--muted);font-size:0.9rem;margin:0}
+
+/* Nav tabs */
+.nav{display:flex;gap:4px;margin-bottom:1rem;flex-wrap:wrap;border-bottom:1px solid var(--border);padding-bottom:8px}
+.nav-btn{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:0.5rem 0.9rem;cursor:pointer;font-family:'Inter',sans-serif;font-size:0.85rem;font-weight:500;color:var(--pink-med);transition:all 0.2s}
+.nav-btn:hover{background:var(--card-hover);border-color:var(--pink)}
+.nav-btn.active{background:var(--pink);color:white;border-color:var(--pink)}
+.page{display:none}.page.active{display:block}
+
+/* Metrics */
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:1rem}
+.metric{background:var(--card);border-radius:10px;padding:0.6rem 0.8rem;border-left:4px solid var(--pink)}
+.metric-label{font-size:0.75rem;color:var(--pink-med);margin-bottom:2px}
+.metric-value{font-size:1.4rem;font-weight:700;color:var(--pink-dark)}
+
+/* Section headers */
+h2{color:var(--pink-dark);font-size:1.3rem;margin:1rem 0 0.6rem}
+h3{color:var(--pink-dark);font-size:1.1rem;margin:0.8rem 0 0.4rem}
+.subtitle{color:var(--muted);font-size:0.85rem;margin-bottom:0.8rem}
+
+/* Workflow */
+.workflow{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem 1.2rem;margin-bottom:1rem}
+.workflow ol{padding-left:1.2rem;color:var(--text);font-size:0.9rem;line-height:1.8}
+.workflow strong{color:var(--pink-dark)}
+
+/* Recipe cards */
+.recipe-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:8px}
+.recipe-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;border-left:4px solid var(--pink);transition:all 0.2s}
+.recipe-card:hover{border-left-color:var(--pink-med);box-shadow:0 2px 12px rgba(255,64,129,0.15);background:var(--card-hover)}
+.card-header{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.card-emoji{font-size:2rem}
+.card-title{font-weight:700;color:var(--pink-dark);font-size:0.95rem}
+.card-meta{color:var(--muted);font-size:0.78rem}
+.card-macros{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.macro-pill{background:var(--pink-light);color:var(--pink-med);padding:2px 8px;border-radius:10px;border:1px solid #4A2035;font-size:0.72rem;font-weight:600}
+.card-tags{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+.tag{background:var(--pink-light);color:var(--pink-med);padding:1px 7px;border-radius:8px;font-size:0.7rem}
+.card-instructions{color:var(--muted);font-size:0.8rem;margin-top:8px;line-height:1.4;display:none}
+.recipe-card.expanded .card-instructions{display:block}
+.expand-btn{background:none;border:none;color:var(--pink);font-size:0.75rem;cursor:pointer;padding:4px 0;font-weight:600;font-family:'Inter',sans-serif}
+.expand-btn:hover{color:var(--pink-dark)}
+
+/* Filter bar */
+.filters{display:flex;gap:6px;margin-bottom:0.8rem;flex-wrap:wrap;align-items:center}
+.filter-btn{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:0.35rem 0.7rem;cursor:pointer;font-family:'Inter',sans-serif;font-size:0.78rem;color:var(--pink-med);transition:all 0.15s}
+.filter-btn:hover{border-color:var(--pink)}
+.filter-btn.active{background:var(--pink);color:white;border-color:var(--pink)}
+.filter-label{color:var(--muted);font-size:0.78rem;font-weight:600}
+
+/* Meal grid table */
+.meal-grid{width:100%;border-collapse:separate;border-spacing:4px;font-size:0.82rem}
+.meal-grid th{background:var(--pink);color:white;padding:6px 8px;border-radius:6px 6px 0 0;text-align:center;font-weight:600}
+.meal-grid .meal-label{background:var(--deep-pink);color:white;padding:6px 10px;border-radius:6px 0 0 6px;font-weight:600;text-align:center;width:80px;vertical-align:top}
+.meal-grid td.meal-cell{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:6px 8px;vertical-align:top;min-width:110px}
+.meal-grid td.meal-cell:hover{background:var(--card-hover);border-color:var(--pink)}
+.meal-cell-item{margin-bottom:4px}
+.meal-cell-item .emoji{font-size:1.3rem}
+.meal-cell-item .name{font-weight:600;color:var(--text);font-size:0.8rem}
+.meal-cell-item .meta{color:var(--muted);font-size:0.7rem}
+.person-badge{display:inline-block;background:var(--pink);color:white;font-size:0.6rem;padding:1px 5px;border-radius:8px;margin-left:3px;font-weight:600}
+
+/* Shopping table */
+.shop-table{width:100%;border-collapse:collapse;font-size:0.85rem}
+.shop-table th{background:var(--pink);color:white;padding:6px 10px;text-align:left}
+.shop-table td{padding:4px 10px;border-bottom:1px solid var(--border);color:var(--text)}
+.shop-table tr:hover td{background:var(--card-hover)}
+.shop-cat-header{background:var(--pink-light)!important;font-weight:700;color:var(--pink-med)!important;padding:6px 10px}
+
+/* Footer */
+.footer{text-align:center;margin-top:2rem;padding-top:1rem;border-top:1px solid var(--border);color:var(--muted);font-size:0.78rem}
+.footer a{color:var(--pink-med)}
+
+@media(max-width:700px){
+  .meal-grid{font-size:0.7rem}
+  .recipe-grid{grid-template-columns:1fr}
+  .metrics{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="banner">
+  <h1>&#127869;&#65039; Meal Planning Amp &#127872;</h1>
+  <p>Weekly meal planning, shopping, and recipe feedback in one place</p>
+</div>
+
+<div class="nav">
+  <button class="nav-btn active" data-page="home">&#127968; Home</button>
+  <button class="nav-btn" data-page="planner">&#128197; Weekly Planner</button>
+  <button class="nav-btn" data-page="shopping">&#128722; Shopping List</button>
+  <button class="nav-btn" data-page="library">&#128218; Recipe Library</button>
+</div>
+
+<!-- ============ HOME ============ -->
+<div class="page active" id="page-home">
+
+  <div class="workflow">
+    <ol>
+      <li><strong>Friday</strong> &mdash; Open Weekly Planner, answer quick check-in, generate the plan</li>
+      <li><strong>Tweak</strong> &mdash; Swap any meals you don't fancy</li>
+      <li><strong>Finalise</strong> &mdash; Lock it in</li>
+      <li><strong>Shopping List</strong> &mdash; Copy or download the auto-generated list</li>
+      <li><strong>Sunday</strong> &mdash; Food arrives, batch cook for the week</li>
+      <li><strong>Rate</strong> &mdash; One-click ratings to improve future suggestions</li>
+    </ol>
+  </div>
+
+  <div class="metrics">
+    <div class="metric"><div class="metric-label">Recipes</div><div class="metric-value">32</div></div>
+    <div class="metric"><div class="metric-label">Weeks planned</div><div class="metric-value">0</div></div>
+    <div class="metric"><div class="metric-label">Meals rated</div><div class="metric-value">0</div></div>
+    <div class="metric"><div class="metric-label">Est. budget</div><div class="metric-value">&pound;100/wk</div></div>
+  </div>
+
+  <h2>Recipe library</h2>
+  <div class="metrics">
+    <div class="metric"><div class="metric-label">&#127859; Breakfasts</div><div class="metric-value">10</div></div>
+    <div class="metric"><div class="metric-label">&#129367; Lunches</div><div class="metric-value">8</div></div>
+    <div class="metric"><div class="metric-label">&#127869;&#65039; Dinners</div><div class="metric-value">14</div></div>
+    <div class="metric"><div class="metric-label">&#128230; Prep-ahead</div><div class="metric-value">5</div></div>
+    <div class="metric"><div class="metric-label">&#127858; Batch</div><div class="metric-value">9</div></div>
+    <div class="metric"><div class="metric-label">&#127859; Fresh</div><div class="metric-value">18</div></div>
+  </div>
+</div>
+
+<!-- ============ WEEKLY PLANNER ============ -->
+<div class="page" id="page-planner">
+  <p class="subtitle">Sample week &mdash; Mon&ndash;Thu batch dinners, Fri&ndash;Sun fresh cooking</p>
+
+  <table class="meal-grid">
+    <thead><tr>
+      <th></th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th><th>Sun</th>
+    </tr></thead>
+    <tbody>
+      <tr>
+        <td class="meal-label">&#127859;<br>Breakfast</td>
+        <td class="meal-cell"><div class="meal-cell-item"><span class="emoji">&#129379;</span><div class="name">Overnight Protein Oats</div><div class="meta">Prep-ahead &middot; 5m<span class="person-badge">P</span></div></div></td>
+        <td class="meal-cell"><div class="meal-cell-item"><span class="emoji">&#129379;</span><div class="name">Overnight Protein Oats</div><div class="meta">Prep-ahead &middot; 5m<span class="person-badge">P</span></div></div></td>
+        <td class="meal-cell"><div class="meal-cell-item"><span class="emoji">&#129379;</span><div class="name">Overnight Protein Oats</div><div class="meta">Prep-ahead &middot; 5m<span class="person-badge">P</span></div></div></td>
+        <td class="meal-cell"><div class="meal-cell-item"><span class="emoji">&#129379;</span><div class="name">Overnight Protein Oats</div><div class="meta">Prep-ahead &middot; 5m<span class="person-badge">P</span></div></div></td>
+        <td class="meal-cell"><div class="meal-cell-item"><span class="emoji">&#129379;</span><div class="name">Overnight Protein Oats</div><div class="meta">Prep-ahead &middot; 5m<span class="person-badge">P</span></div></div></td>
+        <td class="meal-cell"><div class="meal-cell-item"><span class="emoji">&#127859;</span><div class="name">Shakshuka</div><div class="meta">Fresh &middot; 30m<span class="person-badge">Both</span></div></div></td>
+        <td class="meal-cell"><div class="meal-cell-item"><span class="emoji">&#129473;</span><div class="name">Smoked Salmon Scrambled Eggs</div><div class="meta">Fresh &middot; 10m<span class="person-badge">Both</span></div></div></td>
+      </tr>
+      <tr>
+        <td class="meal-label">&#129367;<br>Lunch</td>
+        <td class="meal-cell"><div class="meal-cell-item"><span class="emoji">&#127858;</span><div class="name">Lentil &amp; Sweet Potato Soup</div><div class="meta">Batch &middot; 40m<span class="person-badge">W</span></div></div></td>
+        <td class="meal-cell"><div class="meal-cell-item"><span class="emoji">&#129367;</span><div class="name">Spiced Chickpea &amp; Feta Salad</div><div class="meta">Fresh &middot; 15m<span class="person-badge">W</span></div></div></td>
+        <td class="meal-cell"><div class="meal-cell-item"><span class="emoji">&#127858;</span><div class="name">Lentil &amp; Sweet Potato Soup</div><div class="meta">Batch &middot; 40m<span class="person-badge">W</span></div></div></td>
+        <td class="meal-cell"><div class="meal-cell-item"><span class="emoji">&#129519;</span><div class="name">Grilled Halloumi Grain Bowl</div><div class="meta">Fresh &middot; 25m<span class="person-badge">W</span></div></div></td>
+        <td class="meal-cell"><div class="meal-cell-item"><span class="emoji">&#127858;</span><div class="name">Lentil &amp; Sweet Potato Soup</div><div class="meta">Batch &middot; 40m<span class="person-badge">W</span></div></div></td>
+        <td class="meal-cell"><div class="meal-cell-item"><span class="emoji">&#128031;</span><div class="name">Tuna Nicoise Salad</div><div class="meta">Fresh &middot; 25m<span class="person-badge">Both</span></div></div></td>
+        <td class="meal-cell"><div class="meal-cell-item"><span class="emoji">&#127791;</span><div class="name">Chicken &amp; Avocado Wrap</div><div class="meta">Fresh &middot; 10m<span class="person-badge">Both</span></div></div></td>
+      </tr>
+      <tr>
+        <td class="meal-label">&#127869;&#65039;<br>Dinner</td>
+        <td class="meal-cell"><div class="meal-cell-item"><span class="emoji">&#127835;</span><div class="name">Chicken Tikka Masala</div><div class="meta">Batch &middot; 50m<span class="person-badge">Both</span></div></div></td>
+        <td class="meal-cell"><div class="meal-cell-item"><span class="emoji">&#127835;</span><div class="name">Chicken Tikka Masala</div><div class="meta">Batch &middot; reheat<span class="person-badge">Both</span></div></div></td>
+        <td class="meal-cell"><div class="meal-cell-item"><span class="emoji">&#127837;</span><div class="name">Beef Bolognese</div><div class="meta">Batch &middot; 55m<span class="person-badge">Both</span></div></div></td>
+        <td class="meal-cell"><div class="meal-cell-item"><span class="emoji">&#127837;</span><div class="name">Beef Bolognese</div><div class="meta">Batch &middot; reheat<span class="person-badge">Both</span></div></div></td>
+        <td class="meal-cell"><div class="meal-cell-item"><span class="emoji">&#128031;</span><div class="name">Pan-Seared Salmon</div><div class="meta">Fresh &middot; 30m<span class="person-badge">Both</span></div></div></td>
+        <td class="meal-cell"><div class="meal-cell-item"><span class="emoji">&#129385;</span><div class="name">Steak with Sweet Potato Fries</div><div class="meta">Fresh &middot; 35m<span class="person-badge">Both</span></div></div></td>
+        <td class="meal-cell"><div class="meal-cell-item"><span class="emoji">&#127854;</span><div class="name">Chicken Fajitas</div><div class="meta">Fresh &middot; 25m<span class="person-badge">Both</span></div></div></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Week summary</h3>
+  <div class="metrics">
+    <div class="metric"><div class="metric-label">Meals</div><div class="metric-value">21</div></div>
+    <div class="metric"><div class="metric-label">Batch cooks</div><div class="metric-value">3</div></div>
+    <div class="metric"><div class="metric-label">Fresh cooks</div><div class="metric-value">9</div></div>
+    <div class="metric"><div class="metric-label">Est. cost</div><div class="metric-value">&pound;89</div></div>
+    <div class="metric"><div class="metric-label">Avg protein</div><div class="metric-value">30g</div></div>
+  </div>
+</div>
+
+<!-- ============ SHOPPING LIST ============ -->
+<div class="page" id="page-shopping">
+  <p class="subtitle">Auto-generated shopping list for the sample week, grouped by grocery aisle.</p>
+
+  <table class="shop-table">
+    <thead><tr><th>Item</th><th>Quantity</th></tr></thead>
+    <tbody>
+      <tr><td colspan="2" class="shop-cat-header">&#129379; Dairy &amp; Eggs</td></tr>
+      <tr><td>Eggs</td><td>14</td></tr>
+      <tr><td>Greek yogurt</td><td>450g</td></tr>
+      <tr><td>Whole milk</td><td>550ml</td></tr>
+      <tr><td>Single cream</td><td>100ml</td></tr>
+      <tr><td>Sour cream</td><td>60g</td></tr>
+      <tr><td>Cheddar cheese</td><td>60g</td></tr>
+      <tr><td>Parmesan</td><td>40g</td></tr>
+      <tr><td>Natural yogurt</td><td>100g</td></tr>
+      <tr><td>Butter</td><td>15g</td></tr>
+      <tr><td>Halloumi</td><td>80g</td></tr>
+      <tr><td>Feta cheese</td><td>50g</td></tr>
+
+      <tr><td colspan="2" class="shop-cat-header">&#129385; Meat</td></tr>
+      <tr><td>Chicken breast</td><td>800g</td></tr>
+      <tr><td>Beef mince</td><td>500g</td></tr>
+      <tr><td>Sirloin steak</td><td>300g</td></tr>
+      <tr><td>Ham</td><td>30g</td></tr>
+
+      <tr><td colspan="2" class="shop-cat-header">&#128031; Fish &amp; Seafood</td></tr>
+      <tr><td>Salmon fillet</td><td>250g</td></tr>
+      <tr><td>Smoked salmon</td><td>100g</td></tr>
+      <tr><td>Tinned tuna</td><td>120g</td></tr>
+
+      <tr><td colspan="2" class="shop-cat-header">&#129382; Produce</td></tr>
+      <tr><td>Onions</td><td>6</td></tr>
+      <tr><td>Red onion</td><td>1</td></tr>
+      <tr><td>Garlic cloves</td><td>12</td></tr>
+      <tr><td>Fresh ginger</td><td>20g</td></tr>
+      <tr><td>Red pepper</td><td>3</td></tr>
+      <tr><td>Yellow pepper</td><td>1</td></tr>
+      <tr><td>Cherry tomatoes</td><td>220g</td></tr>
+      <tr><td>Tomato</td><td>1</td></tr>
+      <tr><td>Baby spinach</td><td>30g</td></tr>
+      <tr><td>Mixed salad leaves</td><td>90g</td></tr>
+      <tr><td>Lettuce</td><td>30g</td></tr>
+      <tr><td>Cucumber</td><td>140g</td></tr>
+      <tr><td>Avocado</td><td>2</td></tr>
+      <tr><td>Sweet potato</td><td>600g</td></tr>
+      <tr><td>New potatoes</td><td>400g</td></tr>
+      <tr><td>Asparagus</td><td>150g</td></tr>
+      <tr><td>Green beans</td><td>60g</td></tr>
+      <tr><td>Carrot</td><td>1</td></tr>
+      <tr><td>Celery stick</td><td>1</td></tr>
+      <tr><td>Bananas</td><td>1</td></tr>
+      <tr><td>Mixed berries</td><td>80g</td></tr>
+      <tr><td>Lemons</td><td>3</td></tr>
+      <tr><td>Lime</td><td>1</td></tr>
+      <tr><td>Fresh chives</td><td>1 tbsp</td></tr>
+
+      <tr><td colspan="2" class="shop-cat-header">&#127838; Bakery</td></tr>
+      <tr><td>Sourdough bread</td><td>8 slices</td></tr>
+      <tr><td>Flour tortillas</td><td>5</td></tr>
+      <tr><td>Crusty bread</td><td>2 slices</td></tr>
+
+      <tr><td colspan="2" class="shop-cat-header">&#129387; Pantry &amp; Tins</td></tr>
+      <tr><td>Rolled oats</td><td>60g</td></tr>
+      <tr><td>Protein powder</td><td>30g</td></tr>
+      <tr><td>Honey</td><td>2 tsp</td></tr>
+      <tr><td>Basmati rice</td><td>600g</td></tr>
+      <tr><td>Spaghetti</td><td>320g</td></tr>
+      <tr><td>Couscous</td><td>70g</td></tr>
+      <tr><td>Tinned chopped tomatoes</td><td>1600g</td></tr>
+      <tr><td>Tomato puree</td><td>2 tbsp</td></tr>
+      <tr><td>Tinned chickpeas</td><td>280g</td></tr>
+      <tr><td>Red lentils</td><td>150g</td></tr>
+      <tr><td>Black olives</td><td>20g</td></tr>
+      <tr><td>Vegetable stock</td><td>800ml</td></tr>
+      <tr><td>Olive oil</td><td>7 tbsp</td></tr>
+      <tr><td>Vegetable oil</td><td>4 tbsp</td></tr>
+      <tr><td>Mayonnaise</td><td>2 tbsp</td></tr>
+      <tr><td>Soy sauce</td><td>1 tbsp</td></tr>
+      <tr><td>Sesame oil</td><td>1 tsp</td></tr>
+
+      <tr><td colspan="2" class="shop-cat-header">&#127798;&#65039; Spices &amp; Seasoning</td></tr>
+      <tr><td>Garam masala</td><td>2 tsp</td></tr>
+      <tr><td>Ground turmeric</td><td>1 tsp</td></tr>
+      <tr><td>Ground cumin</td><td>4 tsp</td></tr>
+      <tr><td>Smoked paprika</td><td>2 tsp</td></tr>
+      <tr><td>Dried oregano</td><td>1 tsp</td></tr>
+      <tr><td>Chilli flakes</td><td>1 pinch</td></tr>
+      <tr><td>Salt &amp; pepper</td><td>to taste</td></tr>
+
+      <tr><td colspan="2" class="shop-cat-header">&#10052;&#65039; Frozen</td></tr>
+      <tr><td>Edamame beans</td><td>60g</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ============ RECIPE LIBRARY ============ -->
+<div class="page" id="page-library">
+
+  <div class="filters">
+    <span class="filter-label">Filter:</span>
+    <button class="filter-btn active" data-filter="all">All (32)</button>
+    <button class="filter-btn" data-filter="breakfast">Breakfast (10)</button>
+    <button class="filter-btn" data-filter="lunch">Lunch (8)</button>
+    <button class="filter-btn" data-filter="dinner">Dinner (14)</button>
+  </div>
+  <div class="filters">
+    <span class="filter-label">Method:</span>
+    <button class="filter-btn method-btn active" data-method="all">All</button>
+    <button class="filter-btn method-btn" data-method="prep-ahead">Prep-ahead</button>
+    <button class="filter-btn method-btn" data-method="batch">Batch</button>
+    <button class="filter-btn method-btn" data-method="fresh">Fresh</button>
+  </div>
+
+  <div class="recipe-grid" id="recipe-list"></div>
+</div>
+
+<div class="footer">
+  Meal Planning Amp &mdash; Claude Code Edition &middot; Built at <a href="/">Founders AI Day</a> using <a href="https://docs.anthropic.com/en/docs/claude-code/overview" target="_blank">Claude Code</a>
+</div>
+
+</div>
+
+<script>
+// Nav
+document.querySelectorAll('.nav-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('page-'+btn.dataset.page).classList.add('active');
+  });
+});
+
+// Recipe data
+const recipes=[
+  {name:"Overnight Protein Oats",type:"breakfast",method:"prep-ahead",emoji:"\u{1F963}",cal:450,protein:35,carbs:52,fat:12,fibre:8,cost:1.2,prep:5,cook:0,tags:["high-protein","portable","prep-ahead"],instructions:"Mix oats, protein powder, yogurt and milk in a jar. Refrigerate overnight. Top with berries in the morning."},
+  {name:"Egg Muffin Cups",type:"breakfast",method:"prep-ahead",emoji:"\u{1F9C1}",cal:280,protein:24,carbs:6,fat:18,fibre:2,cost:0.9,prep:10,cook:20,tags:["high-protein","portable","low-carb"],instructions:"Whisk eggs with spinach, cheese and ham. Pour into greased muffin tin. Bake at 180\u00B0C for 20 mins."},
+  {name:"Greek Yogurt & Granola Pot",type:"breakfast",method:"prep-ahead",emoji:"\u{1F95B}",cal:380,protein:28,carbs:42,fat:10,fibre:4,cost:1.5,prep:3,cook:0,tags:["high-protein","portable","no-cook"],instructions:"Layer yogurt, granola and fruit in a pot. Drizzle with honey. Seal and refrigerate."},
+  {name:"PB Banana Overnight Oats",type:"breakfast",method:"prep-ahead",emoji:"\u{1F963}",cal:480,protein:22,carbs:60,fat:18,fibre:7,cost:0.9,prep:5,cook:0,tags:["high-protein","portable"],instructions:"Mix oats, milk, peanut butter and chia seeds. Refrigerate overnight. Top with sliced banana."},
+  {name:"Protein Banana Pancakes",type:"breakfast",method:"prep-ahead",emoji:"\u{1F95E}",cal:400,protein:32,carbs:45,fat:10,fibre:5,cost:1.0,prep:5,cook:10,tags:["high-protein","portable"],instructions:"Blend banana, eggs, oats and protein powder. Cook small pancakes. Cool, stack and refrigerate."},
+  {name:"Shakshuka",type:"breakfast",method:"fresh",emoji:"\u{1F373}",cal:380,protein:20,carbs:28,fat:22,fibre:6,cost:1.8,prep:10,cook:20,tags:["vegetarian","high-iron"],instructions:"Saut\u00E9 onion, peppers and garlic. Add tinned tomatoes, cumin and paprika. Make wells, crack in eggs, cook until set."},
+  {name:"Avocado & Eggs on Sourdough",type:"breakfast",method:"fresh",emoji:"\u{1F951}",cal:420,protein:18,carbs:32,fat:26,fibre:8,cost:2.2,prep:5,cook:5,tags:["vegetarian","omega-3"],instructions:"Toast sourdough. Mash avocado with lemon, salt and chilli. Poach or fry eggs. Assemble."},
+  {name:"Smoked Salmon Scrambled Eggs",type:"breakfast",method:"fresh",emoji:"\u{1F373}",cal:400,protein:32,carbs:24,fat:20,fibre:2,cost:3.0,prep:5,cook:5,tags:["high-protein","omega-3","high-iron"],instructions:"Scramble eggs gently with butter. Fold in smoked salmon and chives. Serve on toast."},
+  {name:"Porridge with Nuts & Seeds",type:"breakfast",method:"fresh",emoji:"\u{1F963}",cal:380,protein:14,carbs:48,fat:16,fibre:7,cost:0.8,prep:2,cook:8,tags:["vegetarian","high-fibre"],instructions:"Cook oats with milk and a pinch of salt. Top with mixed nuts, seeds and honey."},
+  {name:"Berry Smoothie Bowl",type:"breakfast",method:"fresh",emoji:"\u{1FAD0}",cal:350,protein:24,carbs:46,fat:8,fibre:6,cost:2.0,prep:10,cook:0,tags:["vegetarian","high-protein"],instructions:"Blend frozen berries, banana, yogurt and protein powder. Top with granola and fresh fruit."},
+  {name:"Chicken & Avocado Wrap",type:"lunch",method:"fresh",emoji:"\u{1F32F}",cal:450,protein:32,carbs:38,fat:20,fibre:6,cost:2.5,prep:10,cook:0,tags:["high-protein"],instructions:"Shred chicken. Layer in tortilla with avocado, salad leaves and mayo. Roll tightly."},
+  {name:"Lentil & Sweet Potato Soup",type:"lunch",method:"batch",emoji:"\u{1F372}",cal:320,protein:16,carbs:48,fat:6,fibre:10,cost:1.0,prep:10,cook:30,tags:["vegan","high-fibre","high-iron","freezable"],instructions:"Saut\u00E9 onion and garlic. Add sweet potato, lentils, stock and cumin. Simmer 25 mins. Blend."},
+  {name:"Tuna Ni\u00E7oise Salad",type:"lunch",method:"fresh",emoji:"\u{1F957}",cal:400,protein:34,carbs:28,fat:18,fibre:5,cost:2.8,prep:15,cook:10,tags:["high-protein","omega-3"],instructions:"Boil potatoes and beans. Arrange with tuna, eggs, olives and tomatoes. Dress with olive oil and lemon."},
+  {name:"Grilled Halloumi Grain Bowl",type:"lunch",method:"fresh",emoji:"\u{1F9C0}",cal:480,protein:24,carbs:52,fat:20,fibre:8,cost:2.5,prep:10,cook:15,tags:["vegetarian","high-fibre"],instructions:"Cook couscous. Grill halloumi. Toss with roasted veg, chickpeas and lemon dressing."},
+  {name:"Salmon & Edamame Rice Bowl",type:"lunch",method:"fresh",emoji:"\u{1F35A}",cal:520,protein:34,carbs:54,fat:18,fibre:6,cost:3.5,prep:10,cook:15,tags:["high-protein","omega-3"],instructions:"Cook rice. Pan-fry salmon. Arrange with edamame, avocado and pickled ginger. Drizzle with soy and sesame."},
+  {name:"Spiced Chickpea & Feta Salad",type:"lunch",method:"fresh",emoji:"\u{1F957}",cal:420,protein:20,carbs:40,fat:22,fibre:10,cost:1.8,prep:10,cook:5,tags:["vegetarian","high-fibre","high-iron"],instructions:"Warm chickpeas with cumin and paprika. Toss with cucumber, tomatoes, onion and feta."},
+  {name:"Egg Fried Rice",type:"lunch",method:"fresh",emoji:"\u{1F373}",cal:380,protein:14,carbs:52,fat:12,fibre:3,cost:1.0,prep:5,cook:10,tags:["vegetarian","quick"],instructions:"Stir-fry cold rice in sesame oil. Scramble eggs. Mix with peas, soy sauce and spring onions."},
+  {name:"BLT on Sourdough",type:"lunch",method:"fresh",emoji:"\u{1F96A}",cal:450,protein:18,carbs:36,fat:26,fibre:3,cost:2.0,prep:5,cook:5,tags:["quick"],instructions:"Grill bacon until crispy. Toast sourdough. Layer with lettuce, tomato and mayo."},
+  {name:"Chicken Tikka Masala",type:"dinner",method:"batch",emoji:"\u{1F35B}",cal:520,protein:38,carbs:48,fat:18,fibre:4,cost:2.5,prep:15,cook:35,tags:["high-protein","freezable"],instructions:"Marinate chicken in yogurt and spices. Grill, then simmer in tomato cream sauce. Serve with rice."},
+  {name:"Beef Bolognese",type:"dinner",method:"batch",emoji:"\u{1F35D}",cal:520,protein:36,carbs:54,fat:16,fibre:5,cost:2.2,prep:10,cook:45,tags:["high-protein","high-iron","freezable"],instructions:"Brown mince with onion, garlic and celery. Add tomatoes and herbs. Simmer 40 mins. Serve with spaghetti."},
+  {name:"Chickpea & Spinach Curry",type:"dinner",method:"batch",emoji:"\u{1F35B}",cal:400,protein:16,carbs:52,fat:14,fibre:12,cost:1.6,prep:10,cook:25,tags:["vegan","high-fibre","freezable"],instructions:"Fry onion, garlic and spices. Add chickpeas, coconut milk and tomatoes. Stir in spinach. Serve with rice."},
+  {name:"Chilli Con Carne",type:"dinner",method:"batch",emoji:"\u{1F336}\uFE0F",cal:480,protein:34,carbs:46,fat:16,fibre:10,cost:2.0,prep:10,cook:40,tags:["high-protein","high-iron","freezable"],instructions:"Brown mince with onion. Add beans, tomatoes and spices. Simmer 35 mins. Serve with rice and sour cream."},
+  {name:"Thai Green Chicken Curry",type:"dinner",method:"batch",emoji:"\u{1F35B}",cal:490,protein:36,carbs:48,fat:18,fibre:4,cost:2.8,prep:10,cook:25,tags:["high-protein","freezable"],instructions:"Fry curry paste, add chicken and coconut milk with green beans. Simmer 20 mins. Serve with jasmine rice."},
+  {name:"Lamb & Sweet Potato Tagine",type:"dinner",method:"batch",emoji:"\u{1FAD5}",cal:460,protein:30,carbs:44,fat:18,fibre:7,cost:3.5,prep:15,cook:50,tags:["high-protein","high-iron","freezable"],instructions:"Brown lamb. Saut\u00E9 onion with spices. Add sweet potato, apricots and stock. Simmer 45 mins. Serve with couscous."},
+  {name:"Sausage & Bean Casserole",type:"dinner",method:"batch",emoji:"\u{1F372}",cal:440,protein:26,carbs:40,fat:20,fibre:10,cost:1.8,prep:10,cook:35,tags:["high-fibre","freezable"],instructions:"Brown sausages. Saut\u00E9 onion, pepper and garlic. Add beans, tomatoes, stock and herbs. Simmer 25 mins."},
+  {name:"Lentil Dal",type:"dinner",method:"batch",emoji:"\u{1F35B}",cal:380,protein:18,carbs:56,fat:10,fibre:12,cost:1.2,prep:10,cook:30,tags:["vegan","high-fibre","freezable"],instructions:"Simmer lentils in stock. Fry onion, garlic, ginger and spices. Stir into lentils. Serve with naan."},
+  {name:"Pan-Seared Salmon with New Potatoes",type:"dinner",method:"fresh",emoji:"\u{1F41F}",cal:500,protein:40,carbs:36,fat:22,fibre:5,cost:4.5,prep:10,cook:20,tags:["high-protein","omega-3"],instructions:"Boil potatoes. Pan-sear salmon skin-down. Steam asparagus. Serve with lemon."},
+  {name:"Steak with Sweet Potato Fries",type:"dinner",method:"fresh",emoji:"\u{1F969}",cal:550,protein:42,carbs:38,fat:24,fibre:5,cost:5.5,prep:10,cook:25,tags:["high-protein","high-iron"],instructions:"Bake sweet potato fries. Sear steak in hot pan. Rest 5 mins. Serve with salad."},
+  {name:"Prawn Stir-Fry",type:"dinner",method:"fresh",emoji:"\u{1F990}",cal:400,protein:30,carbs:48,fat:10,fibre:4,cost:3.5,prep:10,cook:10,tags:["high-protein","quick"],instructions:"Stir-fry prawns with garlic and ginger. Add peppers, pak choi. Toss with noodles and soy sauce."},
+  {name:"Chicken Fajitas",type:"dinner",method:"fresh",emoji:"\u{1F32E}",cal:480,protein:36,carbs:44,fat:18,fibre:6,cost:3.0,prep:10,cook:15,tags:["high-protein"],instructions:"Fry chicken and peppers with fajita spices. Warm tortillas. Serve with guacamole and sour cream."},
+  {name:"Mushroom Risotto",type:"dinner",method:"fresh",emoji:"\u{1F35A}",cal:450,protein:14,carbs:62,fat:16,fibre:4,cost:2.5,prep:10,cook:30,tags:["vegetarian"],instructions:"Saut\u00E9 shallot. Toast rice. Add stock gradually, stirring. Fold in fried mushrooms and parmesan."},
+  {name:"Grilled Sea Bass with Ratatouille",type:"dinner",method:"fresh",emoji:"\u{1F41F}",cal:380,protein:34,carbs:20,fat:18,fibre:6,cost:5.0,prep:15,cook:30,tags:["high-protein","omega-3"],instructions:"Simmer diced veg in tomatoes with herbs. Grill sea bass skin-down. Serve on the ratatouille."}
+];
+
+function renderRecipes(typeFilter,methodFilter){
+  const list=document.getElementById('recipe-list');
+  list.innerHTML='';
+  recipes.filter(r=>(typeFilter==='all'||r.type===typeFilter)&&(methodFilter==='all'||r.method===methodFilter)).forEach(r=>{
+    const total=r.prep+r.cook;
+    const methodName={['prep-ahead']:'Prep-ahead',batch:'Batch',fresh:'Fresh'}[r.method]||r.method;
+    const timeStr=total>0?` \u00B7 ${total}m`:'';
+    const tagsHtml=r.tags.map(t=>`<span class="tag">${t}</span>`).join('');
+    list.innerHTML+=`
+      <div class="recipe-card" onclick="this.classList.toggle('expanded')">
+        <div class="card-header"><span class="card-emoji">${r.emoji}</span><div><div class="card-title">${r.name}</div><div class="card-meta">${r.type} \u00B7 ${methodName}${timeStr} \u00B7 \u00A3${r.cost.toFixed(2)}/serving</div></div></div>
+        <div class="card-macros"><span class="macro-pill">${r.cal} kcal</span><span class="macro-pill">${r.protein}g protein</span><span class="macro-pill">${r.carbs}g carbs</span><span class="macro-pill">${r.fat}g fat</span><span class="macro-pill">${r.fibre}g fibre</span></div>
+        <div class="card-tags">${tagsHtml}</div>
+        <div class="card-instructions"><br>${r.instructions}<br><button class="expand-btn">&times; close</button></div>
+      </div>`;
+  });
+}
+
+let currentType='all',currentMethod='all';
+document.querySelectorAll('.filter-btn:not(.method-btn)').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.filter-btn:not(.method-btn)').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentType=btn.dataset.filter;
+    renderRecipes(currentType,currentMethod);
+  });
+});
+document.querySelectorAll('.method-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.method-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentMethod=btn.dataset.method;
+    renderRecipes(currentType,currentMethod);
+  });
+});
+renderRecipes('all','all');
+</script>
+</body>
+</html>
