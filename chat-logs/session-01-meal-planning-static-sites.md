@@ -1,227 +1,340 @@
-# Chat Session 01: Meal Planning Static Sites & Netlify Deployment
+# Session Record: 2026-03-30 to 2026-04-02
 
-**Date:** 2026-03-30 to 2026-03-31
 **Project:** founders-ai-day
-**Tools used:** Claude Code (Opus 4.6)
 **Repo:** github.com/philip-papasavvas/founders-ai-day
+**Tool:** Claude Code (Opus 4.6)
 
 ---
 
-## 1. Session Goal
+## Interaction 1: Convert Streamlit app to static HTML
 
-Convert two Streamlit meal planning apps into static HTML sites, deploy them under a shared Netlify domain with a landing page, and document everything for future use.
+### Trigger
+User requested a static HTML version of the `meal_planning_amp/` Streamlit app, to be deployed on Netlify. Asked for it in a subfolder.
 
----
+### What Happened
+1. Read all source files: `meal_planning_amp.py`, `meal_planning/catalog.py`, `meal_planning/planner.py`, `meal_planning/ui.py`, `meal_planning/storage.py`, `meal_planning/pdf_export.py`, `meal_planning/history.py`, `data/meal_planner/history.json`
+2. Ran `python3 -c "..."` to execute the planner with default `MealPlannerPreferences()` and dump the generated plan as JSON (schedule, recipes, shopping list, stats)
+3. Created `meal_planning_amp/netlify-site/index.html` — single-file HTML with embedded CSS, all plan data hardcoded from the Python output, tab-based navigation (Weekly pattern, Recipes & methods, Shopping list)
+4. Opened the file in browser via `open` command for user preview
 
-## 2. Starting State
+### Constraints Observed
+- Data must come from actually running the Python planner, not from guessing or hardcoding placeholder content
+- The CSS design system must match the original Streamlit app (Cormorant Garamond headings, IBM Plex Sans body, plum/berry/rosewood palette, 22px border-radius cards)
+- Weekly grid was initially 4 columns + 3 columns (matching Streamlit's `st.columns(4)` + `st.columns(3)`)
+- Recipe sub-tabs needed: Breakfast, Lunch, Dinner
+- Shopping table grouped by Category
 
-- Repo had one committed Streamlit app (`meal_planning_amp/`) and one untracked app (`meal_planner_mitchell/`)
-- No deployment infrastructure
-- No CLAUDE.md or project documentation beyond a stub README
+### Data Flow
+- Read: `meal_planning/catalog.py` (all meal definitions) → `meal_planning/planner.py` (plan generation logic) → `meal_planning/ui.py` (CSS variables, HTML templates) → `data/meal_planner/history.json` (ratings data)
+- Executed: Python planner with default preferences → JSON output of schedule, recipes, shopping, stats
+- Written: `meal_planning_amp/netlify-site/index.html`
 
----
-
-## 3. Interaction Log
-
-### 3.1 — Initial request: Create HTML version of meal_planning_amp
-
-**User said:** "I want to come up with a version of this which is just in HTML format, please. And then you can publish that and deploy it on netlify as a website, so can you create a subfolder with the HTML file to deploy?"
-
-**What Claude did:**
-- Read all source files to understand the app (catalog, planner, UI, storage, history, pdf_export)
-- Ran the Python planner to generate actual plan data as JSON (rather than hardcoding fake data)
-- Created `netlify-site/index.html` with the same CSS design system, all data embedded
-- Opened it in browser for preview
-
-**Constraint learned:** User wants real data from the app, not placeholder content. Claude ran the Python code to extract the actual generated meal plan.
-
-**Decision point:** Layout was initially 4+3 grid (matching Streamlit). User later changed this to 5+2.
+### Manual Steps That Could Be Automated
+- User had to ask Claude to create the HTML — could be a one-command "export to static HTML" feature in the app itself
+- The Python-to-JSON-to-HTML pipeline could be a build script (`python generate_static.py > site/index.html`)
+- CSS design tokens were manually copied from `ui.py` — could be shared via a config file
 
 ---
 
-### 3.2 — User asks to commit
+## Interaction 2: Commit and push
 
-**User said:** "and then please help me to commit this and then we can deploy it"
+### Trigger
+User said: "and then please help me to commit this and then we can deploy it"
 
-**What Claude did:** Staged and committed with a descriptive message.
+### What Happened
+1. `git status` — identified untracked `meal_planning_amp/netlify-site/`
+2. `git add meal_planning_amp/netlify-site/index.html`
+3. `git commit -m "Add static HTML version..."` with Co-Authored-By trailer
+4. User later said "push it" → `git push`
 
-**Pattern:** User expects Claude to handle git workflow end-to-end (stage, commit, push) when asked.
+### Constraints Observed
+- One logical change per commit
+- Descriptive commit messages (what + why)
+- Co-Authored-By trailer required on all commits
+- Push only when explicitly requested
 
----
+### Data Flow
+- Staged: `meal_planning_amp/netlify-site/index.html`
+- Remote: pushed to `origin/main`
 
-### 3.3 — Content removal
-
-**User said:** "remove this from the site: 'What the old version got wrong...' but definitely commit that"
-
-**What Claude did:** Removed the line, committed separately.
-
-**Constraint learned:** User wants granular commits — one logical change per commit. User explicitly said "definitely commit that" indicating they want changes persisted immediately, not batched.
-
----
-
-### 3.4 — Push
-
-**User said:** "push it"
-
-**What Claude did:** `git push` immediately.
-
-**Pattern:** User gives short, direct commands for git operations. No need to ask for confirmation on push when explicitly requested.
+### Manual Steps That Could Be Automated
+- The entire commit-and-push flow could be triggered automatically after a build step
 
 ---
 
-### 3.5 — Subdomain / multi-site structure
+## Interaction 3: Remove specific content from site
 
-**User said:** "how can I put this under a subdomain in netlify, for example I want to have multiple sites within this deployment"
+### Trigger
+User said: "remove this from the site: 'What the old version got wrong: the pills carried too much meaning, the week itself was hard to read, and the shopping list wasted space. This version fixes those first.' but definitely commit that"
 
-**What Claude did:** Proposed restructuring from `netlify-site/` to `site/` with subdirectories. Asked user if they wanted this done.
+### What Happened
+1. Used Edit tool to remove the `<p class="caption">` element containing the specified text
+2. Staged and committed as a separate commit
 
-**User said:** "yes, and restructure the publish directory, please"
+### Constraints Observed
+- User specified exact text to remove — match precisely
+- User explicitly said "definitely commit that" — commit immediately, don't batch
 
-**What Claude did:**
-- Moved HTML from `meal_planning_amp/netlify-site/` to `site/meal-planning/`
-- Created `site/index.html` as a landing page
-- Removed old directory
+### Data Flow
+- Modified: `meal_planning_amp/netlify-site/index.html` (removed 2 lines)
 
-**Constraint learned:** User thinks in terms of a deployment structure that can grow. They want a single Netlify site with path-based routing to multiple demos.
-
----
-
-### 3.6 — Layout change
-
-**User said:** "I want to change the app to have monday to friday on the top row, and then saturday and sunday on the row below"
-
-**What Claude did:** Changed CSS grid from `repeat(4, 1fr)` / `repeat(3, 1fr)` to `repeat(5, 1fr)` / `repeat(2, 1fr)` and moved Friday's HTML from the bottom grid to the top.
-
-**Pattern:** User gives specific layout instructions. They know what they want visually and state it precisely.
+### Manual Steps That Could Be Automated
+- Content management (add/remove sections) could be driven by a config file rather than manual HTML editing
 
 ---
 
-### 3.7 — Landing page request
+## Interaction 4: Restructure for multi-site Netlify deployment
 
-**User said:** "and also create a landing page to set this all up, please"
+### Trigger
+User asked: "how can I put this under a subdomain in netlify, for example I want to have multiple sites within this deployment"
 
-**What Claude did:** Created `site/index.html` with demo cards linking to subdirectories, using the same design system.
+### What Happened
+1. Proposed restructuring: `site/` at repo root with subdirectories per demo
+2. User confirmed: "yes, and restructure the publish directory, please"
+3. Changed CSS grid: `repeat(4, 1fr)` → `repeat(5, 1fr)` for top row, `repeat(3, 1fr)` → `repeat(2, 1fr)` for bottom row (user wanted Mon-Fri top, Sat-Sun bottom)
+4. Moved Friday HTML block from bottom grid to top grid
+5. `mv meal_planning_amp/netlify-site/index.html site/meal-planning/index.html`
+6. `rmdir meal_planning_amp/netlify-site`
+7. Created `site/index.html` as landing page with demo card links
+8. Committed and pushed
 
-**Pattern:** User often stacks multiple requests in sequence while Claude is working. Claude needs to handle these as they come in.
+### Constraints Observed
+- Netlify publish directory: `site/`
+- Each demo must be a self-contained subdirectory with `index.html`
+- Landing page uses same design system (Cormorant Garamond, plum palette)
+- Demo cards link using absolute paths (`/meal-planning/`)
+- Weekly layout: weekdays (5 cols) top row, weekend (2 cols) bottom row
 
----
+### Data Flow
+- Moved: `meal_planning_amp/netlify-site/index.html` → `site/meal-planning/index.html`
+- Created: `site/index.html`
+- Deleted: `meal_planning_amp/netlify-site/` (empty dir)
 
-### 3.8 — CLAUDE.md request
-
-**User said:** "can you commit this to a claude.md file in the root of the repository please, so that in other conversations I can pickup from where I left off and publish other sites to this page?"
-
-**What Claude did:** Created `CLAUDE.md` with:
-- Repo structure overview
-- Netlify config (publish dir, site name)
-- Step-by-step "adding a new demo" instructions
-- Design system documentation (fonts, colours, card styles)
-- List of existing demos
-
-**Constraint learned:** User wants persistence across conversations. CLAUDE.md is their mechanism for this — it should contain actionable instructions, not just descriptions.
-
----
-
-### 3.9 — README documentation
-
-**User said:** "can you also add some documentation to the repo folder meal_planning_amp, and just give the background that the app was created on Sunday 29 March 2026 at the Dr Will's head office for the AI founders day, and that it was generated using ampcode"
-
-**What Claude did:** Updated `meal_planning_amp/README.md` and root `README.md`.
-
-**Correction from user:** Claude initially wrote "Ampcode, Anthropic's agentic coding tool." User corrected: "Amp is not Anthropic's tool, Amp is Sourcegraph's tool that leverages multiple models."
-
-**Constraint learned:** Do not assume tool ownership. Ampcode = Sourcegraph. Claude Code = Anthropic. User cares about accurate attribution.
+### Manual Steps That Could Be Automated
+- Directory restructuring for new deployment targets could be scripted
+- Landing page card generation could be automatic based on subdirectories in `site/`
 
 ---
 
-### 3.10 — README refinement
+## Interaction 5: Create CLAUDE.md for cross-conversation persistence
 
-**User said:** "each folder has the source code for a functioning app, and also the subfolder for the netlify site, which is deployed on the landing page"
+### Trigger
+User said: "can you commit this to a claude.md file in the root of the repository please, so that in other conversations I can pickup from where I left off and publish other sites to this page?"
 
-**What Claude did:** Added clarifying text to README about the relationship between source folders and site/ subdirectories.
+### What Happened
+1. Created `CLAUDE.md` at repo root with: repo structure, Netlify config (publish dir, site name), step-by-step instructions for adding new demos, design system tokens, list of existing demos
+2. Committed and pushed
 
-**Pattern:** User refines docs iteratively. They'll review what Claude writes and add missing context.
+### Constraints Observed
+- CLAUDE.md must contain actionable instructions, not just descriptions
+- Must include enough context for a fresh conversation to continue the work
+- Design system tokens documented: fonts, colour hex values, border-radius, box-shadow values
 
----
+### Data Flow
+- Created: `CLAUDE.md`
 
-### 3.11 — Commit untracked files + build second static site
-
-**User said:** "the meal_planning other folder, non amp, is the claude code generated one, so I want you to publish that too"
-
-**Subsequent messages:**
-- "which files need git commit and pushing, since I see all of these are untracked"
-- "I want to do a similar thing to before with the app in the meal_planning_mitchell folder, since I want to publish the site as HTML, ideally to the netlify site, and if possible we can click on different pages etc."
-
-**What Claude did:**
-1. Committed `meal_planner_mitchell/` and `meal_planning_amp/data/` (previously untracked)
-2. Read all source files (seed_data.py with 32 recipes, styles.py with dark theme, app.py, all pages)
-3. Built a multi-page static HTML site at `site/meal-planner-claude/` with:
-   - Home page with stats and workflow
-   - Weekly planner with sample grid (Mon-Fri + Sat-Sun)
-   - Shopping list grouped by category
-   - Recipe library with type and method filters, expandable cards
-   - All 32 recipes embedded as JavaScript data
-4. Updated landing page with both demo cards
-5. Added README for `meal_planner_mitchell/`
-6. Updated root README with both projects
-7. Committed and pushed everything
-
-**Constraint learned:** User wants multi-page navigation even in static HTML (tabs/pages within single file). The experience should feel like the Streamlit app, not just a flat document.
-
-**User interruption:** User accidentally rejected a tool call and said "sorry I want you to do that static directory, please. I made a mistake by interrupting you." Claude resumed without issue.
-
-**Pattern:** User sometimes accidentally interrupts. Just continue where you left off without fuss.
+### Manual Steps That Could Be Automated
+- CLAUDE.md could be auto-generated from the site directory structure and a design tokens config
 
 ---
 
-## 4. Key Constraints & Preferences (Summary)
+## Interaction 6: Update READMEs with project context
 
-### Git workflow
-- Commit after each logical change, don't batch unrelated changes
-- Push when explicitly asked
-- Use descriptive commit messages
-- Don't ask for confirmation on simple operations
+### Trigger
+User said: "add some documentation... the app was created on Sunday 29 March 2026 at the Dr Will's head office for the AI founders day, and that it was generated using ampcode"
 
-### Code & content
-- Use real data from the app, not placeholders
-- Maintain the original app's design system in the static version
-- Multi-page navigation preferred (tabs within single HTML file)
-- Accurate tool/company attribution matters
+### What Happened
+1. Updated `meal_planning_amp/README.md` — added date, location, and tool attribution
+2. Updated root `README.md` — added Netlify link, project table, context about AI day
+3. **Error:** Claude initially wrote "Ampcode, Anthropic's agentic coding tool"
+4. **User correction:** "Amp is not Anthropic's tool, Amp is Sourcegraph's tool that leverages multiple models"
+5. Fixed attribution: "Ampcode, Sourcegraph's agentic coding tool"
+6. User then added: "each folder has the source code for a functioning app, and also the subfolder for the netlify site"
+7. Updated README table to clarify relationship between source folders and `site/` subdirectories
 
-### Documentation
-- CLAUDE.md should have actionable instructions for future conversations
-- READMEs should include: when/where built, which tool was used, setup instructions
-- Keep docs concise and practical
+### Constraints Observed
+- **Tool attribution must be accurate:** Ampcode = Sourcegraph, Claude Code = Anthropic
+- READMEs must include: date, location, tool used, setup instructions
+- Relationship between source code folders and deployment folders must be explicit
 
-### Deployment
-- Single Netlify site with subdirectory-based routing
-- Publish directory: `site/`
-- Landing page links to all demos
-- Each demo is a self-contained subdirectory with an `index.html`
+### Data Flow
+- Modified: `meal_planning_amp/README.md`, `README.md`
 
-### Communication style
-- User gives short, direct commands
-- User stacks requests (sends follow-ups while Claude is still working)
-- User corrects mistakes immediately and precisely
-- User prefers action over discussion — do the thing, don't ask if they want it done
+### Manual Steps That Could Be Automated
+- README generation could be templated: given tool name, date, location → generate standard README
 
 ---
 
-## 5. Artifacts Created
+## Interaction 7: Commit untracked files and build second static site
 
-| File | Purpose |
-|------|---------|
-| `site/index.html` | Landing page listing all demos |
-| `site/meal-planning/index.html` | Static HTML of Ampcode meal planner (light pink theme) |
-| `site/meal-planner-claude/index.html` | Static HTML of Claude Code meal planner (dark mode, 4 pages) |
-| `CLAUDE.md` | Cross-conversation context for future sessions |
-| `README.md` | Repo overview with Netlify link |
-| `meal_planning_amp/README.md` | Ampcode app docs |
-| `meal_planner_mitchell/README.md` | Claude Code app docs |
+### Trigger
+User said: "the meal_planning other folder, non amp, is the claude code generated one, so I want you to publish that too" and "which files need git commit and pushing, since I see all of these are untracked"
+
+### What Happened
+1. `git status` — identified untracked `meal_planner_mitchell/` and `meal_planning_amp/data/`
+2. Committed both directories (excluded `__pycache__` and `.db` files via existing `.gitignore`)
+3. Read all source files: `seed_data.py` (32 recipes), `styles.py` (dark theme CSS), `app.py`, all 5 pages
+4. Created `site/meal-planner-claude/index.html` — single-file HTML with:
+   - 4 navigable pages (Home, Weekly Planner, Shopping List, Recipe Library)
+   - Dark mode theme (bg: #0E1117, pink accent: #FF4081)
+   - All 32 recipes embedded as JavaScript array
+   - Filter buttons for meal type and cooking method
+   - Expandable recipe cards (click to toggle instructions)
+   - Sample weekly grid with Mon-Sun schedule
+   - Shopping list grouped by aisle category
+5. Updated `site/index.html` — added second demo card
+6. Created `meal_planner_mitchell/README.md` with tool attribution (Claude Code, Anthropic)
+7. Updated root `README.md` with both projects in table
+8. Committed and pushed
+
+### Constraints Observed
+- Multi-page navigation within single HTML file (tab switching via JS)
+- Static site must feel like the Streamlit app, not a flat document
+- Dark mode: specific hex values (#0E1117 bg, #1A1D24 cards, #FF4081 pink, #F48FB1 pink-med)
+- Recipe data embedded as JS array, filtered client-side
+- Weekly grid: batch dinners Mon-Thu (same recipe repeated 2 days), fresh dinners Fri-Sun
+- Person badges: P (Philip), W (Wife), Both
+- Cooking methods: prep-ahead, batch, fresh
+- Recipe card macros: kcal, protein, carbs, fat, fibre — all displayed as pills
+
+### Data Flow
+- Read: `seed_data.py` (32 recipe dicts) → `styles.py` (CSS variables) → `app.py` (home page structure) → `pages/*.py` (page layouts)
+- Created: `site/meal-planner-claude/index.html`, `meal_planner_mitchell/README.md`
+- Modified: `site/index.html`, `README.md`
+
+### Manual Steps That Could Be Automated
+- Recipe data extraction from Python dicts to JS array was manual — could be a build script
+- Landing page card addition is manual — could auto-discover subdirectories in `site/`
+- The "run Python app → extract data → generate static HTML" pipeline is repeated for both apps
 
 ---
 
-## 6. Open Items / Future Work
+## Interaction 8: Add premium bonds app from zip file
 
-- Netlify deployment itself was not done in this session (user to connect repo in Netlify UI)
-- More demos may be added to the `site/` directory from other projects
-- User plans to synthesize interaction logs from 4-5 sessions to build an automation app
+### Trigger
+User said: "I also want to add the following to the landing page too: /Users/philip.papasavvas/Downloads/premium-bonds-netlify.zip"
+
+### What Happened
+1. `unzip -l` to inspect contents — found a Vite build output (`dist/` with `index.html`, `assets/`, `favicon.svg`, `icons.svg`)
+2. Extracted to `/tmp/`, copied `dist/` contents to `site/premium-bonds/`
+3. Fixed asset paths in `index.html`: absolute (`/assets/...`, `/favicon.svg`) → relative (`./assets/...`, `./favicon.svg`) for subdirectory deployment
+4. Verified no absolute paths in the bundled JS file
+5. Added demo card to `site/index.html`
+6. Committed and pushed
+
+### Constraints Observed
+- **Subdirectory asset paths:** Vite builds with absolute paths by default (`/assets/...`). When deployed under a subdirectory (`/premium-bonds/`), these must be converted to relative paths (`./assets/...`)
+- Only `index.html` needed path fixes — bundled JS used relative references internally
+- Zip file contained a `dist/` folder — contents needed to be extracted one level up
+
+### Data Flow
+- Read: `/Users/philip.papasavvas/Downloads/premium-bonds-netlify.zip` (external)
+- Created: `site/premium-bonds/index.html`, `site/premium-bonds/assets/*`, `site/premium-bonds/favicon.svg`, `site/premium-bonds/icons.svg`
+- Modified: `site/index.html` (added demo card)
+
+### Manual Steps That Could Be Automated
+- Zip extraction + path fixing + landing page update could be a single script: `./add-demo.sh <name> <zip-path>`
+- Asset path fixing (absolute → relative) is a common Vite deployment issue — could be handled by setting `base: './'` in `vite.config.ts`
+
+---
+
+## Interaction 9: Record session interactions
+
+### Trigger
+User said: "I want you to record all of my interactions in this chat because eventually I want to give lots of context about how I interact with Claude Code to be able to write an app to bring together all of this useful stuff"
+
+### What Happened
+1. Initially created `chat-logs/session-01-meal-planning-static-sites.md` in a narrative format
+2. User then pointed to `SESSION_RECORDING_PROMPT.md` in another repo (`finance-analysis`) as the required structure
+3. Rewrote the session log following the structured format (this document)
+
+### Constraints Observed
+- Session records must follow the structure in `SESSION_RECORDING_PROMPT.md`
+- Each interaction needs: Trigger, What Happened, Constraints Observed, Data Flow, Manual Steps That Could Be Automated
+- Focus on constraints and rules over narrative
+- Record sequence of file updates (order matters)
+- Note where user corrected Claude (specification gaps)
+- Goal: synthesise 4-5 session records into an automation spec
+
+### Data Flow
+- Read: `/Users/philip.papasavvas/PycharmProjects/finance-analysis/planning/chat_sessions/SESSION_RECORDING_PROMPT.md`
+- Modified: `chat-logs/session-01-meal-planning-static-sites.md`
+
+### Manual Steps That Could Be Automated
+- Session recording itself could be automated via a hook that logs all tool calls and user messages
+
+---
+
+## Cross-Cutting Sections
+
+### Information Flow
+
+The general pattern across this session:
+
+```
+Source app (Streamlit Python)
+  → Read all source files to understand structure/data
+  → Run Python code to extract actual plan data as JSON
+  → Create single-file HTML with embedded data and CSS
+  → Place in site/<demo-name>/index.html
+  → Add card to site/index.html (landing page)
+  → Commit and push
+  → Netlify auto-deploys from main
+```
+
+For pre-built apps (zip files):
+```
+Zip file → Extract → Fix asset paths (absolute → relative) → Place in site/<name>/ → Update landing page → Commit and push
+```
+
+### Recurring Decision Points
+
+1. **Where to place the static site:** Always `site/<demo-name>/index.html`. Name derived from the project/app name, kebab-cased.
+2. **Single file vs multi-file HTML:** Single file preferred — all CSS inline, all data embedded as JS or hardcoded HTML. Only exception: pre-built apps with bundled assets.
+3. **When to commit:** After each logical change. Never batch unrelated changes.
+4. **When to push:** Only when user explicitly says "push" or "push it".
+5. **Asset path strategy:** Relative paths (`./assets/...`) for subdirectory compatibility.
+
+### Files Modified
+
+| File | Change |
+|------|--------|
+| `meal_planning_amp/netlify-site/index.html` | Created, then moved to `site/meal-planning/index.html` |
+| `site/index.html` | Created as landing page, updated 3 times (added demo cards) |
+| `site/meal-planning/index.html` | Moved from netlify-site, grid layout changed to 5+2, caption removed |
+| `site/meal-planner-claude/index.html` | Created — dark mode, 4-page static site with 32 recipes |
+| `site/premium-bonds/index.html` | Extracted from zip, asset paths fixed |
+| `site/premium-bonds/assets/*` | Extracted from zip (JS bundle, CSS) |
+| `site/premium-bonds/favicon.svg` | Extracted from zip |
+| `site/premium-bonds/icons.svg` | Extracted from zip |
+| `CLAUDE.md` | Created — Netlify config, design system, add-demo instructions |
+| `README.md` | Updated 3 times — added context, Netlify link, project table |
+| `meal_planning_amp/README.md` | Updated — added date, location, Ampcode attribution |
+| `meal_planner_mitchell/README.md` | Created — Claude Code attribution |
+| `chat-logs/session-01-meal-planning-static-sites.md` | Created, then rewritten in structured format |
+
+### User Preferences Observed
+
+- **Short, direct commands.** "push it", "remove this", "yes, and restructure the publish directory, please"
+- **Stacks requests.** Sends follow-up messages while Claude is still working. Expects Claude to handle them in sequence.
+- **Corrects immediately and precisely.** "Amp is not Anthropic's tool, Amp is Sourcegraph's tool" — no ambiguity.
+- **Prefers action over discussion.** Doesn't want "should I do X?" — wants it done, will correct if wrong.
+- **Wants granular commits** but doesn't want to be asked about commit messages.
+- **Values accurate attribution.** Tool/company ownership matters.
+- **Thinks in deployment structure.** Immediately asked about multi-site subdirectory routing.
+- **Wants cross-conversation persistence.** CLAUDE.md and session logs as mechanisms.
+- **Iterates on docs.** Reviews what Claude writes, adds missing context in follow-ups.
+
+### Errors & Corrections
+
+| Error | Correction | Specification Gap |
+|-------|-----------|-------------------|
+| Claude wrote "Ampcode, Anthropic's agentic coding tool" | User corrected: "Amp is Sourcegraph's tool" | Tool attribution lookup — never assume ownership without verification |
+| User accidentally rejected a tool call (mkdir) | User said "sorry I want you to do that, I made a mistake" | Accidental rejections happen — resume without fuss when user clarifies |
+
+### Open Questions
+
+- Netlify deployment was not actually configured in this session — user needs to connect the repo in Netlify UI and set publish directory to `site`
+- Site name `founders-ai-day-demos` assumed but not confirmed as available on Netlify
+- More demos expected from other AI day projects — no details yet on what they are
+- User plans 4-5 session recordings before synthesising into an automation spec — format now confirmed via `SESSION_RECORDING_PROMPT.md`
